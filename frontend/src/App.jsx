@@ -16,9 +16,13 @@ export default function App() {
   const [postProHours, setPostProHours] = useState("0");
   const [extras, setExtras] = useState("0");
 
+  const [quality, setQuality] = useState("normal"); // draft | normal | fine
+
   const [total, setTotal] = useState(null);
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const [estimating, setEstimating] = useState(false);
 
   // Load data
   useEffect(() => {
@@ -99,6 +103,53 @@ export default function App() {
     }
   }
 
+  // NEW: Estimate from STL/3MF
+  async function estimateFromFile(file) {
+    if (!file) return;
+    if (!materialId) {
+      setErr("اول متریال را انتخاب کن.");
+      return;
+    }
+
+    setErr("");
+    setEstimating(true);
+    setTotal(null);
+
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("material_id", materialId);
+      fd.append("quality", quality);
+
+      // اگر route شما /estimate نیست، اینجا را عوض کن:
+      const res = await fetch(`${API}/estimate`, {
+        method: "POST",
+        body: fd,
+      });
+
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+
+      // پر کردن اتومات فیلدها
+      if (data?.estimated_grams !== undefined && data?.estimated_grams !== null) {
+        setGrams(String(data.estimated_grams));
+      }
+      if (data?.estimated_minutes !== undefined && data?.estimated_minutes !== null) {
+        setMinutes(String(data.estimated_minutes));
+      }
+
+      // اگر warning داشتی، برای MVP فقط تو console
+      if (data?.warnings?.length) {
+        // eslint-disable-next-line no-console
+        console.warn("estimate warnings:", data.warnings);
+      }
+    } catch (e) {
+      setErr(e?.message || String(e));
+    } finally {
+      setEstimating(false);
+    }
+  }
+
   return (
     <div className="page" dir="rtl" lang="fa">
       <div className="wrap">
@@ -176,6 +227,34 @@ export default function App() {
                 />
               </div>
 
+              {/* NEW: Upload section */}
+              <div className="field">
+                <label className="label">آپلود فایل برای تخمین (STL/3MF)</label>
+                <input
+                  className="input"
+                  type="file"
+                  accept=".stl,.3mf"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) estimateFromFile(f);
+                    e.target.value = "";
+                  }}
+                />
+              </div>
+
+              <div className="field">
+                <label className="label">کیفیت تخمین</label>
+                <select
+                  className="select"
+                  value={quality}
+                  onChange={(e) => setQuality(e.target.value)}
+                >
+                  <option value="draft">Draft (سریع)</option>
+                  <option value="normal">Normal</option>
+                  <option value="fine">Fine (کیفیت)</option>
+                </select>
+              </div>
+
               <div className="field">
                 <label className="label">وزن فیلامنت (گرم) — برای هر عدد</label>
                 <input
@@ -185,6 +264,11 @@ export default function App() {
                   inputMode="decimal"
                   placeholder="مثلاً 120"
                 />
+                {estimating ? (
+                  <div style={{ fontSize: 12, opacity: 0.7, marginTop: 6 }}>
+                    در حال تخمین…
+                  </div>
+                ) : null}
               </div>
 
               <div className="field">
