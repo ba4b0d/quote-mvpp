@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
+import fs from "fs";
 
 export default defineConfig({
   plugins: [
@@ -21,9 +22,29 @@ export default defineConfig({
         lang: "fa",
         icons: [
           { src: "/pwa-192.png", sizes: "192x192", type: "image/png" },
-          { src: "/pwa-512.png", sizes: "512x512", type: "image/png" }
-        ]
-      }
+          { src: "/pwa-512.png", sizes: "512x512", type: "image/png" },
+        ],
+      },
     }),
   ],
+
+  // برای dev
+  server: {
+    host: "0.0.0.0",
+    port: 5173,
+    https: {
+      key: fs.readFileSync("./key.pem"),
+      cert: fs.readFileSync("./cert.pem"),
+    },
+  },
+
+  // برای preview (بعد از build)
+  preview: {
+    host: "0.0.0.0",
+    port: 4173,
+    https: {
+      key: fs.readFileSync("./key.pem"),
+      cert: fs.readFileSync("./cert.pem"),
+    },
+  },
 });
