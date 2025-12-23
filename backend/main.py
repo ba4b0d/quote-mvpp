@@ -29,6 +29,8 @@ ALLOWED_ORIGINS = [
     # LAN (your PC/phone)
     "http://192.168.100.21:5173",
     "http://192.168.100.21:4173",
+    "https://192.168.100.21:5173",
+    "https://192.168.100.21:4173",
 
     # (Optional) if later you serve frontend from other LAN IP
     # add them here

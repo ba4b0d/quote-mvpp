@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-const API = import.meta.env.VITE_API_BASE_URL || "http://192.168.100.21:8000";
+const API = import.meta.env.VITE_API_BASE_URL || "https://192.168.100.21:8000";
 console.log("API BASE =", API);
 
 // ---------- Helpers ----------
