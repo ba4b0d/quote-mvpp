@@ -28,23 +28,4 @@ export default defineConfig({
     }),
   ],
 
-  // برای dev
-  server: {
-    host: "0.0.0.0",
-    port: 5173,
-    https: {
-      key: fs.readFileSync("./key.pem"),
-      cert: fs.readFileSync("./cert.pem"),
-    },
-  },
-
-  // برای preview (بعد از build)
-  preview: {
-    host: "0.0.0.0",
-    port: 4173,
-    https: {
-      key: fs.readFileSync("./key.pem"),
-      cert: fs.readFileSync("./cert.pem"),
-    },
-  },
 });

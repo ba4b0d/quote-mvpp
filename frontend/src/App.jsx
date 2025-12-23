@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 
-const API = import.meta.env.VITE_API_BASE_URL || "https://192.168.100.21:8000";
-console.log("API BASE =", API);
+const API = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const DEV = import.meta.env.DEV;
+
+if (DEV) console.log("API BASE =", API);
 
 // ---------- Helpers ----------
 const toman = (v) => Number(v || 0).toLocaleString("fa-IR");
@@ -38,14 +40,14 @@ export default function App() {
   const [quality, setQuality] = useState("normal"); // draft|normal|fine
   const [progress, setProgress] = useState(0);
 
-  const [estGrams, setEstGrams] = useState(null);     // per one
+  const [estGrams, setEstGrams] = useState(null); // per one
   const [estMinutes, setEstMinutes] = useState(null); // per one
 
   const [total, setTotal] = useState(null);
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // ---------- Debug Panel (راه 2) ----------
+  // ---------- Debug Panel (DEV only) ----------
   const [debugOpen, setDebugOpen] = useState(true);
   const [debugLines, setDebugLines] = useState([]);
 
@@ -53,6 +55,7 @@ export default function App() {
   const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
 
   const log = (msg) => {
+    if (!DEV) return;
     setDebugLines((p) => {
       const line = `${new Date().toLocaleTimeString()}  ${msg}`;
       return [line, ...p].slice(0, 80);
@@ -60,17 +63,17 @@ export default function App() {
   };
 
   async function safeFetch(url, opts) {
-    log(`FETCH → ${opts?.method || "GET"} ${url}`);
+    if (DEV) log(`FETCH → ${opts?.method || "GET"} ${url}`);
     try {
       const res = await fetch(url, opts);
-      log(`RESP  ← ${res.status} ${res.statusText} (${url})`);
+      if (DEV) log(`RESP  ← ${res.status} ${res.statusText} (${url})`);
       return res;
     } catch (e) {
-      log(`FETCH FAIL: ${String(e?.message || e)} (${url})`);
+      if (DEV) log(`FETCH FAIL: ${String(e?.message || e)} (${url})`);
       throw e;
     }
   }
-  // ----------------------------------------
+  // ------------------------------------------
 
   // Load dropdown data
   useEffect(() => {
@@ -108,7 +111,7 @@ export default function App() {
 
       setGroupId(firstGroup?.group_id || "");
       setMaterialId(firstOption?.id || "");
-      setMachineId((mc?.[0]?.id) || "");
+      setMachineId(mc?.[0]?.id || "");
     })().catch((e) => {
       setErr(String(e?.message || e));
       log(`INIT ERROR: ${String(e?.message || e)}`);
@@ -219,8 +222,8 @@ export default function App() {
       const est = await estimateFromApi(file, materialId, quality);
       setProgress(65);
 
-      const g1 = Number(est?.estimated_grams || 0);     // per one
-      const m1 = Number(est?.estimated_minutes || 0);   // per one
+      const g1 = Number(est?.estimated_grams || 0); // per one
+      const m1 = Number(est?.estimated_minutes || 0); // per one
 
       setEstGrams(g1);
       setEstMinutes(m1);
@@ -258,69 +261,93 @@ export default function App() {
           </p>
         </header>
 
-        {/* Debug Panel */}
-        <section className="card" style={{ marginBottom: 14 }}>
-          <div style={{ padding: 12 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center" }}>
-              <div style={{ fontWeight: 900 }}>دیباگ (روی گوشی)</div>
-              <button className="btn btn--ghost" type="button" onClick={() => setDebugOpen((s) => !s)}>
-                {debugOpen ? "بستن" : "باز کردن"}
-              </button>
-            </div>
+        {/* Debug Panel (DEV only) */}
+        {DEV && (
+          <section className="card" style={{ marginBottom: 14 }}>
+            <div style={{ padding: 12 }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: 10,
+                  alignItems: "center",
+                }}
+              >
+                <div style={{ fontWeight: 900 }}>دیباگ (روی گوشی)</div>
+                <button
+                  className="btn btn--ghost"
+                  type="button"
+                  onClick={() => setDebugOpen((s) => !s)}
+                >
+                  {debugOpen ? "بستن" : "باز کردن"}
+                </button>
+              </div>
 
-            <div style={{ marginTop: 10, fontSize: 12, opacity: 0.85, lineHeight: 1.8 }}>
-              <div><b>API_BASE:</b> {API}</div>
-              <div><b>ORIGIN:</b> {origin}</div>
-              <div><b>User-Agent:</b> {ua}</div>
-            </div>
+              <div style={{ marginTop: 10, fontSize: 12, opacity: 0.85, lineHeight: 1.8 }}>
+                <div>
+                  <b>API_BASE:</b> {API}
+                </div>
+                <div>
+                  <b>ORIGIN:</b> {origin}
+                </div>
+                <div>
+                  <b>User-Agent:</b> {ua}
+                </div>
+              </div>
 
-            {debugOpen && (
-              <>
-                <div style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  <button className="btn btn--ghost" type="button" onClick={() => setDebugLines([])}>
-                    پاک کردن لاگ
-                  </button>
-                  <button
-                    className="btn btn--primary"
-                    type="button"
-                    onClick={async () => {
-                      setErr("");
-                      try {
-                        const res = await safeFetch(`${API}/health`);
-                        const j = await res.json().catch(() => ({}));
-                        log(`PING OK: ${JSON.stringify(j)}`);
-                      } catch (e) {
-                        setErr(e?.message || String(e));
-                      }
+              {debugOpen && (
+                <>
+                  <div style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    <button
+                      className="btn btn--ghost"
+                      type="button"
+                      onClick={() => setDebugLines([])}
+                    >
+                      پاک کردن لاگ
+                    </button>
+                    <button
+                      className="btn btn--primary"
+                      type="button"
+                      onClick={async () => {
+                        setErr("");
+                        try {
+                          const res = await safeFetch(`${API}/health`);
+                          const j = await res.json().catch(() => ({}));
+                          log(`PING OK: ${JSON.stringify(j)}`);
+                        } catch (e) {
+                          setErr(e?.message || String(e));
+                        }
+                      }}
+                    >
+                      Ping /health
+                    </button>
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 10,
+                      maxHeight: 220,
+                      overflow: "auto",
+                      background: "#111",
+                      color: "#d7ffd7",
+                      borderRadius: 12,
+                      padding: 10,
+                      fontFamily:
+                        "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+                      fontSize: 12,
+                      direction: "ltr",
+                      textAlign: "left",
+                      whiteSpace: "pre-wrap",
+                      wordBreak: "break-word",
                     }}
                   >
-                    Ping /health
-                  </button>
-                </div>
-
-                <div
-                  style={{
-                    marginTop: 10,
-                    maxHeight: 220,
-                    overflow: "auto",
-                    background: "#111",
-                    color: "#d7ffd7",
-                    borderRadius: 12,
-                    padding: 10,
-                    fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-                    fontSize: 12,
-                    direction: "ltr",
-                    textAlign: "left",
-                    whiteSpace: "pre-wrap",
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {debugLines.length ? debugLines.join("\n") : "No logs yet..."}
-                </div>
-              </>
-            )}
-          </div>
-        </section>
+                    {debugLines.length ? debugLines.join("\n") : "No logs yet..."}
+                  </div>
+                </>
+              )}
+            </div>
+          </section>
+        )}
 
         {err && (
           <div className="alert">
@@ -455,9 +482,7 @@ export default function App() {
                       <div className="progressFill" style={{ width: `${progress}%` }} />
                     </div>
 
-                    <div className="hint">
-                      این خروجی «حدودی» است و ممکن است با اسلایسر واقعی فرق داشته باشد.
-                    </div>
+                    <div className="hint">این خروجی «حدودی» است و ممکن است با اسلایسر واقعی فرق داشته باشد.</div>
                   </div>
                 </>
               )}

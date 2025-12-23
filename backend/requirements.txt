@@ -1,2 +1,7 @@
-numpy
-trimesh
+fastapi==0.127.0
+uvicorn[standard]==0.40.0
+pydantic==2.12.5
+python-multipart==0.0.21
+python-dotenv==1.2.1
+numpy==2.4.0
+trimesh==4.10.1
