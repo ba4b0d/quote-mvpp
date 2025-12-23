@@ -9,7 +9,7 @@
     "estimate_support_overhead": 0.05,
     "estimate_time_min_per_cm3": 2.8,
     "estimate_time_fixed_min": 12,
-    "estimate_mass_multiplier": 1.6
+    "estimate_mass_multiplier": 1
   },
   "materials": [
     { "id": "pla_black", "name": "PLA", "price_per_kg": 1650000, "waste_pct": 0.05, "density_g_cm3": 1.24, "color": "Black", "notes": "General purpose" },

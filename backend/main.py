@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from fastapi import FastAPI, HTTPException, UploadFile, File, Form
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 from pydantic import BaseModel, Field
 from pathlib import Path
 import json
@@ -13,20 +14,56 @@ import numpy as np
 import trimesh
 
 
-app = FastAPI(title="3DJAT Quote API", version="0.6.1")
+app = FastAPI(title="3DJAT Quote API", version="0.6.2")
+
+# ----------------------------
+# CORS (ONE middleware only)
+# ----------------------------
+ALLOWED_ORIGINS = [
+    # Local dev
+    "http://localhost:5173",
+    "http://localhost:4173",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:4173",
+
+    # LAN (your PC/phone)
+    "http://192.168.100.21:5173",
+    "http://192.168.100.21:4173",
+
+    # (Optional) if later you serve frontend from other LAN IP
+    # add them here
+
+    # Production domains (if you later host frontend on these)
+    "https://3djat.com",
+    "https://www.3djat.com",
+]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "https://3djat.com",
-        "https://www.3djat.com",
-    ],
-    allow_credentials=True,
+    allow_origins=ALLOWED_ORIGINS,
+    allow_credentials=False,  # IMPORTANT: keep False for simple CORS in LAN
     allow_methods=["*"],
     allow_headers=["*"],
+    max_age=86400,
 )
+
+# Chrome/Android can require Private Network preflight headers sometimes.
+# Add the header on every response (safe).
+@app.middleware("http")
+async def add_private_network_header(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["Access-Control-Allow-Private-Network"] = "true"
+    return response
+
+# Make sure OPTIONS never fails (covers unusual preflight cases)
+@app.options("/{path:path}")
+def options_preflight(path: str):
+    return Response(
+        status_code=200,
+        headers={
+            "Access-Control-Allow-Private-Network": "true",
+        },
+    )
 
 DATA_PATH = Path(__file__).parent / "data.json"
 
@@ -192,7 +229,7 @@ def material_groups():
 
         groups[key]["options"].append({
             "id": m["id"],
-            "label": m.get("color", ""),
+            "label": m.get("color", "") or m["id"],
             "price_per_kg": m.get("price_per_kg", 0),
             "waste_pct": m.get("waste_pct", 0),
             "density_g_cm3": m.get("density_g_cm3", None),
@@ -266,7 +303,6 @@ async def estimate(
         q_mul = 1.35
 
     volume_factor = min(1.0, max(0.05, infill + shell + support))
-
     printed_volume_cm3 = volume_cm3 * volume_factor
 
     # MASS CALIBRATION (optional): helps match slicer weight
@@ -339,7 +375,6 @@ def quote(req: QuoteRequest):
     overhead_t = overhead_pct * base
 
     Extras = float(req.extras)
-
     subtotal = base + overhead_t + Extras
     Total = subtotal * (1.0 + markup_pct)
 
@@ -356,7 +391,3 @@ def quote(req: QuoteRequest):
         Extras=r0(Extras),
         Total=r0(Total),
     )
-
-
-# Helpful debug line (optional):
-# print("ROUTES:", [r.path for r in app.routes])
