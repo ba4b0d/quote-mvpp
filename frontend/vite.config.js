@@ -18,7 +18,6 @@ export default defineConfig(({ mode }) => {
           description: isStaff
             ? "نسخه داخلی محاسبه‌گر قیمت چاپ سه‌بعدی 3DJAT"
             : "محاسبه‌گر قیمت چاپ سه‌بعدی 3DJAT",
-          // مهم: برای staff باید زیر /staff/ نصب شود
           start_url: isStaff ? "/staff/" : "/",
           scope: isStaff ? "/staff/" : "/",
           display: "standalone",

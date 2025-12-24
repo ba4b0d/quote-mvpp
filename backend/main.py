@@ -6,13 +6,25 @@ import io
 import zipfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from datetime import datetime, timedelta
 
 import numpy as np
 import trimesh
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, UploadFile, File, Form
+from fastapi import (
+    FastAPI,
+    HTTPException,
+    UploadFile,
+    File,
+    Form,
+    Depends,
+)
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
+
+from passlib.context import CryptContext
+from jose import jwt, JWTError
 
 # ----------------------------
 # ENV
@@ -25,16 +37,78 @@ def _csv_env_list(name: str, default: str = "") -> list[str]:
 
 ALLOWED_ORIGINS = _csv_env_list(
     "CORS_ORIGINS",
-    # default (safe for local dev)
     "http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173",
 )
 
 # ----------------------------
+# JWT Auth (Staff)
+# ----------------------------
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "CHANGE_ME")  # MUST override in .env
+JWT_EXPIRE_MINUTES = int(os.getenv("JWT_EXPIRE_MINUTES", "10080"))  # 7 days default
+JWT_ALG = "HS256"
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+bearer = HTTPBearer(auto_error=False)
+
+def _parse_staff_users() -> dict[str, str]:
+    """
+    STAFF_USERS env format:
+      user1:<bcrypt_hash>,user2:<bcrypt_hash>
+    Example:
+      STAFF_USERS=ba4b0d:$2b$12$...,negin:$2b$12$...
+    """
+    raw = os.getenv("STAFF_USERS", "") or ""
+    out: dict[str, str] = {}
+    for part in raw.split(","):
+        part = part.strip()
+        if not part or ":" not in part:
+            continue
+        u, h = part.split(":", 1)
+        u = u.strip()
+        h = h.strip()
+        if u and h:
+            out[u] = h
+    return out
+
+STAFF_USERS = _parse_staff_users()
+
+def create_access_token(username: str) -> str:
+    exp = datetime.utcnow() + timedelta(minutes=JWT_EXPIRE_MINUTES)
+    payload = {"sub": username, "role": "staff", "exp": exp}
+    return jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALG)
+
+def get_current_staff(creds: HTTPAuthorizationCredentials = Depends(bearer)) -> str:
+    if creds is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    token = creds.credentials
+    try:
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALG])
+        if payload.get("role") != "staff":
+            raise HTTPException(status_code=403, detail="Forbidden")
+        username = payload.get("sub")
+        if not username:
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid token",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        return str(username)
+    except JWTError:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+# ----------------------------
 # App
 # ----------------------------
-app = FastAPI(title="3DJAT Quote API", version="0.6.3")
+app = FastAPI(title="3DJAT Quote API", version="0.7.0")
 
-# ONE CORS middleware only
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
@@ -46,12 +120,10 @@ app.add_middleware(
 
 DATA_PATH = Path(__file__).parent / "data.json"
 
-
 def load_data() -> dict:
     if not DATA_PATH.exists():
         raise RuntimeError(f"data.json not found at: {DATA_PATH}")
     return json.loads(DATA_PATH.read_text(encoding="utf-8"))
-
 
 # ----------------------------
 # Models
@@ -61,13 +133,10 @@ class QuoteRequest(BaseModel):
     machine_id: str
 
     qty: int = Field(default=1, ge=1)
-
     filament_grams: float = Field(ge=0)         # per item
     print_time_minutes: float = Field(ge=0)     # per item
-
     post_pro_hours: float = Field(default=0, ge=0)  # per item
     extras: float = Field(default=0, ge=0)          # total order extras (toman)
-
 
 class QuoteResponse(BaseModel):
     Matrial_t: float
@@ -79,7 +148,6 @@ class QuoteResponse(BaseModel):
     Extras: float
     Total: float
 
-
 class EstimateResponse(BaseModel):
     volume_cm3: float
     bbox_mm: dict
@@ -87,6 +155,9 @@ class EstimateResponse(BaseModel):
     estimated_minutes: float
     warnings: list[str] = []
 
+class LoginRequest(BaseModel):
+    username: str
+    password: str
 
 # ----------------------------
 # Mesh loaders (STL / 3MF)
@@ -101,11 +172,9 @@ def _mesh_from_trimesh_loaded(obj) -> trimesh.Trimesh:
         raise ValueError("Unsupported mesh type")
     return obj
 
-
 def _load_mesh_from_stl_bytes(b: bytes) -> trimesh.Trimesh:
     loaded = trimesh.load(io.BytesIO(b), file_type="stl")
     return _mesh_from_trimesh_loaded(loaded)
-
 
 def _load_mesh_from_3mf_bytes(b: bytes) -> trimesh.Trimesh:
     # Try 1: trimesh direct
@@ -156,29 +225,24 @@ def _load_mesh_from_3mf_bytes(b: bytes) -> trimesh.Trimesh:
     mesh = trimesh.Trimesh(vertices=v, faces=f, process=True)
     return mesh
 
-
 # ----------------------------
-# Routes
+# Public Routes
 # ----------------------------
 @app.get("/health")
 def health():
     return {"ok": True}
 
-
 @app.get("/settings")
 def get_settings():
     return load_data()["settings"]
-
 
 @app.get("/materials")
 def get_materials():
     return load_data()["materials"]
 
-
 @app.get("/machines")
 def get_machines():
     return load_data()["machines"]
-
 
 @app.get("/material-groups")
 def material_groups():
@@ -214,7 +278,6 @@ def material_groups():
         g["options"].sort(key=lambda o: (o.get("label") or "").lower())
 
     return {"material_groups": out}
-
 
 @app.post("/estimate", response_model=EstimateResponse)
 async def estimate(
@@ -288,7 +351,6 @@ async def estimate(
         warnings=warnings,
     )
 
-
 @app.post("/quote", response_model=QuoteResponse)
 def quote(req: QuoteRequest):
     data = load_data()
@@ -356,3 +418,39 @@ def quote(req: QuoteRequest):
         Extras=r0(Extras),
         Total=r0(Total),
     )
+
+# ----------------------------
+# Auth Routes (Staff)
+# ----------------------------
+@app.post("/auth/login")
+def auth_login(req: LoginRequest):
+    users = STAFF_USERS
+    if not users:
+        raise HTTPException(500, "STAFF_USERS not configured")
+
+    stored_hash = users.get(req.username)
+    if not stored_hash or not pwd_context.verify(req.password, stored_hash):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    token = create_access_token(req.username)
+    return {"access_token": token, "token_type": "bearer"}
+
+@app.get("/auth/me")
+def auth_me(username: str = Depends(get_current_staff)):
+    return {"ok": True, "username": username, "role": "staff"}
+
+# ----------------------------
+# Staff Routes (Protected)
+# ----------------------------
+@app.post("/staff/quote", response_model=QuoteResponse)
+def staff_quote(req: QuoteRequest, username: str = Depends(get_current_staff)):
+    return quote(req)
+
+@app.post("/staff/estimate", response_model=EstimateResponse)
+async def staff_estimate(
+    file: UploadFile = File(...),
+    material_id: str = Form(...),
+    quality: str = Form("normal"),
+    username: str = Depends(get_current_staff),
+):
+    return await estimate(file=file, material_id=material_id, quality=quality)

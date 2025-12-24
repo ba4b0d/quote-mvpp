@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-const API = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const API = import.meta.env.VITE_API_BASE_URL || "/api";
 const DEV = import.meta.env.DEV;
 
 const toman = (v) => Number(v || 0).toLocaleString("fa-IR");
@@ -43,44 +43,30 @@ export default function StaffQuote() {
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const [debugOpen, setDebugOpen] = useState(true);
-  const [debugLines, setDebugLines] = useState([]);
-
-  const origin = typeof window !== "undefined" ? window.location.origin : "";
-  const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
-
-  const log = (msg) => {
-    if (!DEV) return;
-    setDebugLines((p) => {
-      const line = `${new Date().toLocaleTimeString()}  ${msg}`;
-      return [line, ...p].slice(0, 80);
-    });
-  };
+  const token = localStorage.getItem("staff_token") || "";
 
   async function safeFetch(url, opts) {
-    if (DEV) log(`FETCH → ${opts?.method || "GET"} ${url}`);
-    try {
-      const res = await fetch(url, opts);
-      if (DEV) log(`RESP  ← ${res.status} ${res.statusText} (${url})`);
-      return res;
-    } catch (e) {
-      if (DEV) log(`FETCH FAIL: ${String(e?.message || e)} (${url})`);
-      throw e;
-    }
+    return await fetch(url, opts);
   }
 
   useEffect(() => {
     (async () => {
       setErr("");
-      log(`API_BASE = ${API}`);
-      log(`ORIGIN  = ${origin}`);
 
+      // verify token quickly (optional)
       try {
-        const h = await safeFetch(`${API}/health`);
-        const hj = await h.json().catch(() => ({}));
-        log(`HEALTH OK: ${JSON.stringify(hj)}`);
-      } catch (e) {
-        log(`HEALTH FAIL: ${String(e?.message || e)}`);
+        const me = await safeFetch(`${API}/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!me.ok) {
+          localStorage.removeItem("staff_token");
+          window.location.href = "/staff/login";
+          return;
+        }
+      } catch {
+        localStorage.removeItem("staff_token");
+        window.location.href = "/staff/login";
+        return;
       }
 
       const [mgRes, mcRes] = await Promise.all([
@@ -106,7 +92,6 @@ export default function StaffQuote() {
       setMachineId(mc?.[0]?.id || "");
     })().catch((e) => {
       setErr(String(e?.message || e));
-      log(`INIT ERROR: ${String(e?.message || e)}`);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -130,7 +115,7 @@ export default function StaffQuote() {
     return materialId && machineId && Number(upQty) >= 1 && !!file;
   }, [materialId, machineId, upQty, file]);
 
-  async function quote({ q, gramsPerOne, minutesPerOne, postHours, extraT }) {
+  async function staffQuote({ q, gramsPerOne, minutesPerOne, postHours, extraT }) {
     const body = {
       material_id: materialId,
       machine_id: machineId,
@@ -141,9 +126,12 @@ export default function StaffQuote() {
       extras: Number(extraT || 0),
     };
 
-    const res = await safeFetch(`${API}/quote`, {
+    const res = await safeFetch(`${API}/staff/quote`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify(body),
     });
 
@@ -151,13 +139,18 @@ export default function StaffQuote() {
     return await res.json();
   }
 
-  async function estimateFromApi(fileObj, matId, q) {
+  async function staffEstimate(fileObj, matId, q) {
     const fd = new FormData();
     fd.append("file", fileObj);
     fd.append("material_id", matId);
     fd.append("quality", q);
 
-    const res = await safeFetch(`${API}/estimate`, { method: "POST", body: fd });
+    const res = await safeFetch(`${API}/staff/estimate`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: fd,
+    });
+
     if (!res.ok) throw new Error(await res.text());
     return await res.json();
   }
@@ -168,7 +161,7 @@ export default function StaffQuote() {
     setLoading(true);
 
     try {
-      const data = await quote({
+      const data = await staffQuote({
         q: qty,
         gramsPerOne: grams,
         minutesPerOne: minutes,
@@ -195,7 +188,7 @@ export default function StaffQuote() {
     try {
       setProgress(10);
 
-      const est = await estimateFromApi(file, materialId, quality);
+      const est = await staffEstimate(file, materialId, quality);
       setProgress(65);
 
       const g1 = Number(est?.estimated_grams || 0);
@@ -204,7 +197,7 @@ export default function StaffQuote() {
       setEstGrams(g1);
       setEstMinutes(m1);
 
-      const data = await quote({
+      const data = await staffQuote({
         q: upQty,
         gramsPerOne: g1,
         minutesPerOne: m1,
@@ -226,50 +219,10 @@ export default function StaffQuote() {
     <div className="page" dir="rtl" lang="fa">
       <div className="wrap">
         <header className="hero">
-          <div className="hero__badge">3DJAT • Staff</div>
+          <div className="hero__badge">3DJAT • پنل داخلی</div>
           <h1 className="hero__title">قیمت‌دهی داخلی</h1>
-          <p className="hero__sub">نسخه کامل برای نیروها (Qty/Time/Extras/Manual + Upload)</p>
+          <p className="hero__sub">فقط برای کارکنان</p>
         </header>
-
-        {DEV && (
-          <section className="card" style={{ marginBottom: 14 }}>
-            <div style={{ padding: 12 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center" }}>
-                <div style={{ fontWeight: 900 }}>دیباگ</div>
-                <button className="btn btn--ghost" type="button" onClick={() => setDebugOpen((s) => !s)}>
-                  {debugOpen ? "بستن" : "باز کردن"}
-                </button>
-              </div>
-
-              {debugOpen && (
-                <div
-                  style={{
-                    marginTop: 10,
-                    maxHeight: 220,
-                    overflow: "auto",
-                    background: "#111",
-                    color: "#d7ffd7",
-                    borderRadius: 12,
-                    padding: 10,
-                    fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-                    fontSize: 12,
-                    direction: "ltr",
-                    textAlign: "left",
-                    whiteSpace: "pre-wrap",
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {debugLines.length ? debugLines.join("\n") : "No logs yet..."}
-                  <div style={{ marginTop: 10, opacity: 0.8 }}>
-                    API_BASE={API} | ORIGIN={origin}
-                    <br />
-                    UA={ua}
-                  </div>
-                </div>
-              )}
-            </div>
-          </section>
-        )}
 
         {err && (
           <div className="alert">
@@ -303,6 +256,17 @@ export default function StaffQuote() {
                 type="button"
               >
                 آپلود STL <span className="pill">حدودی</span>
+              </button>
+
+              <button
+                className="tab"
+                type="button"
+                onClick={() => {
+                  localStorage.removeItem("staff_token");
+                  window.location.href = "/staff/login";
+                }}
+              >
+                خروج
               </button>
             </div>
 
@@ -372,7 +336,7 @@ export default function StaffQuote() {
                   <div className="field">
                     <label className="label">تعداد (Qty)</label>
                     <input className="input" value={upQty} onChange={(e) => setUpQty(e.target.value)} inputMode="numeric" />
-                    <div className="hint">در تب آپلود فقط «متریال + تعداد + فایل». زمان/وزن از /estimate می‌آید.</div>
+                    <div className="hint">در تب آپلود فقط «متریال + تعداد + فایل». زمان/وزن از /staff/estimate می‌آید.</div>
                   </div>
 
                   <div className="field">
@@ -385,7 +349,7 @@ export default function StaffQuote() {
                   </div>
 
                   <div className="field field--full">
-                    <label className="label">فایل STL</label>
+                    <label className="label">فایل STL/3MF</label>
                     <input className="input" type="file" accept=".stl,.3mf" onChange={(e) => setFile(e.target.files?.[0] || null)} />
 
                     <div className="progressRow" style={{ marginTop: 10 }}>
