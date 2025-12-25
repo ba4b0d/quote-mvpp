@@ -20,10 +20,19 @@ export default function StaffLogin() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
       });
+
       if (!res.ok) throw new Error(await res.text());
+
       const j = await res.json();
+
+      // token + role
       localStorage.setItem("staff_token", j.access_token);
-      nav("/staff", { replace: true });
+      localStorage.setItem("staff_role", j.role || "staff");
+      if (j.username) localStorage.setItem("staff_username", j.username);
+
+      // go to admin if admin
+      const target = (j.role === "admin") ? "/admin" : "/staff";
+      nav(target, { replace: true });
     } catch (e2) {
       setErr(String(e2?.message || e2));
     } finally {
@@ -52,12 +61,23 @@ export default function StaffLogin() {
             <form onSubmit={onSubmit} className="grid">
               <div className="field field--full">
                 <label className="label">نام کاربری</label>
-                <input className="input" value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" />
+                <input
+                  className="input"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  autoComplete="username"
+                />
               </div>
 
               <div className="field field--full">
                 <label className="label">رمز عبور</label>
-                <input className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
+                <input
+                  className="input"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="current-password"
+                />
               </div>
 
               <div className="actions" style={{ gridColumn: "1 / -1" }}>
@@ -70,6 +90,8 @@ export default function StaffLogin() {
                   type="button"
                   onClick={() => {
                     localStorage.removeItem("staff_token");
+                    localStorage.removeItem("staff_role");
+                    localStorage.removeItem("staff_username");
                     nav("/", { replace: true });
                   }}
                 >

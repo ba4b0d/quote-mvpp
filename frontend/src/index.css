@@ -997,3 +997,13 @@ body{
   background: rgba(143,133,139,1);
   color: rgba(255,255,255,.95);
 }
+
+/* Admin editor container polish */
+.cm-editor { border-radius: 16px; overflow: hidden; }
+.cm-scroller { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+
+/* === Admin form polish === */
+.card{ padding: 14px; border-radius: 18px; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.04); box-shadow: 0 18px 40px rgba(0,0,0,.18); }
+.card__title{ color: rgba(255,255,255,.92); }
+.hint{ opacity: .85; }
+input[type="checkbox"]{ width: 16px; height: 16px; accent-color: rgb(79,125,99); }

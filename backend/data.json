@@ -1,7 +1,7 @@
 {
   "settings": {
     "electricity_rate_per_kwh": 812,
-    "overhead_pct": 0.30,
+    "overhead_pct": 0.3,
     "markup_pct": 2,
     "coloring_cost_per_hour": 150000,
     "estimate_infill_pct": 0.2,
@@ -12,60 +12,274 @@
     "estimate_mass_multiplier": 1
   },
   "materials": [
-    { "id": "pla_black", "name": "PLA", "price_per_kg": 1650000, "waste_pct": 0.05, "density_g_cm3": 1.24, "color": "Black", "notes": "General purpose" },
-    { "id": "pla_orange", "name": "PLA", "price_per_kg": 1650000, "waste_pct": 0.05, "density_g_cm3": 1.24, "color": "orange", "notes": "General purpose" },
-    { "id": "pla_gray", "name": "PLA", "price_per_kg": 1650000, "waste_pct": 0.05, "density_g_cm3": 1.24, "color": "gray", "notes": "General purpose" },
-    { "id": "pla_red", "name": "PLA", "price_per_kg": 1650000, "waste_pct": 0.05, "density_g_cm3": 1.24, "color": "Red", "notes": "General purpose" },
-    { "id": "pla_white", "name": "PLA", "price_per_kg": 1650000, "waste_pct": 0.05, "density_g_cm3": 1.24, "color": "white", "notes": "General purpose" },
-
-    { "id": "pla_silk_gold_black", "name": "PLA silk", "price_per_kg": 1750000, "waste_pct": 0.05, "density_g_cm3": 1.24, "color": "gold black", "notes": "General purpose" },
-
-    { "id": "petg_black", "name": "PETG", "price_per_kg": 1750000, "waste_pct": 0.07, "density_g_cm3": 1.24, "color": "black", "notes": "Heat resistant" },
-    { "id": "tpu_black", "name": "TPU (95A)", "price_per_kg": 2480000, "waste_pct": 0.08, "density_g_cm3": 1.24, "color": "black", "notes": "Flexible" },
-
-    { "id": "pla_plus_olive_green", "name": "PLA +", "price_per_kg": 1650000, "waste_pct": 0.05, "density_g_cm3": 1.24, "color": "Olive Green", "notes": "General purpose" },
-    { "id": "pla_plus_pine_green", "name": "PLA +", "price_per_kg": 1650000, "waste_pct": 0.05, "density_g_cm3": 1.24, "color": "Pine Green", "notes": "General purpose" },
-
-    { "id": "petg_white_gp", "name": "PETG", "price_per_kg": 1650000, "waste_pct": 0.07, "density_g_cm3": 1.24, "color": "White", "notes": "General purpose" },
-
-    { "id": "pla_silk_gold_blue_coper", "name": "PLA SILK", "price_per_kg": 1750000, "waste_pct": 0.05, "density_g_cm3": 1.24, "color": "Gold blue coper", "notes": "General purpose" },
-    { "id": "pla_silk_gold_silver_red", "name": "PLA SILK", "price_per_kg": 1750000, "waste_pct": 0.05, "density_g_cm3": 1.24, "color": "gold silver red", "notes": "General purpose" },
-
-    { "id": "wood_walnut", "name": "WOOD", "price_per_kg": 1750000, "waste_pct": 0.07, "density_g_cm3": 1.24, "color": "walnut", "notes": "General purpose" },
-    { "id": "wood_dark_mahaguni", "name": "WOOD", "price_per_kg": 1740000, "waste_pct": 0.07, "density_g_cm3": 1.24, "color": "DARK MAHAGUNI", "notes": "General purpose" },
-
-    { "id": "pla_mate_white", "name": "PLA MATE", "price_per_kg": 1690000, "waste_pct": 0.05, "density_g_cm3": 1.24, "color": "white", "notes": "General purpose" },
-    { "id": "pla_mate_blue", "name": "PLA MATE", "price_per_kg": 1690000, "waste_pct": 0.05, "density_g_cm3": 1.24, "color": "blue", "notes": "General purpose" },
-    { "id": "pla_mate_lavander_purple", "name": "PLA MATE", "price_per_kg": 1690000, "waste_pct": 0.05, "density_g_cm3": 1.24, "color": "lavander purple", "notes": "General purpose" },
-
-    { "id": "pla_fast_white", "name": "PLA Fast", "price_per_kg": 1870000, "waste_pct": 0.05, "density_g_cm3": 1.24, "color": "white", "notes": "" },
-
-    { "id": "petg_transparent", "name": "petg transparent", "price_per_kg": 2000000, "waste_pct": 0.05, "density_g_cm3": 1.24, "color": "TRANSPARENT", "notes": "" }
+    {
+      "id": "pla_black",
+      "name": "PLA",
+      "price_per_kg": 1650000.0,
+      "waste_pct": 0.05,
+      "density_g_cm3": 1.24,
+      "color": "Black",
+      "notes": "General purpose",
+      "is_public": false,
+      "is_active": true,
+      "title_fa": null
+    },
+    {
+      "id": "pla_orange",
+      "name": "PLA",
+      "price_per_kg": 1650000.0,
+      "waste_pct": 0.05,
+      "density_g_cm3": 1.24,
+      "color": "orange",
+      "notes": "General purpose",
+      "is_public": false,
+      "is_active": true,
+      "title_fa": null
+    },
+    {
+      "id": "pla_gray",
+      "name": "PLA",
+      "price_per_kg": 1650000.0,
+      "waste_pct": 0.05,
+      "density_g_cm3": 1.24,
+      "color": "gray",
+      "notes": "General purpose",
+      "is_public": false,
+      "is_active": true,
+      "title_fa": null
+    },
+    {
+      "id": "pla_red",
+      "name": "PLA",
+      "price_per_kg": 1650000.0,
+      "waste_pct": 0.05,
+      "density_g_cm3": 1.24,
+      "color": "Red",
+      "notes": "General purpose",
+      "is_public": false,
+      "is_active": true,
+      "title_fa": null
+    },
+    {
+      "id": "pla_white",
+      "name": "PLA",
+      "price_per_kg": 1650000.0,
+      "waste_pct": 0.05,
+      "density_g_cm3": 1.24,
+      "color": "white",
+      "notes": "General purpose",
+      "is_public": false,
+      "is_active": true,
+      "title_fa": null
+    },
+    {
+      "id": "pla_silk_gold_black",
+      "name": "PLA silk",
+      "price_per_kg": 1750000.0,
+      "waste_pct": 0.05,
+      "density_g_cm3": 1.24,
+      "color": "gold black",
+      "notes": "General purpose",
+      "is_public": false,
+      "is_active": true,
+      "title_fa": null
+    },
+    {
+      "id": "petg_black",
+      "name": "PETG",
+      "price_per_kg": 1750000.0,
+      "waste_pct": 0.07,
+      "density_g_cm3": 1.24,
+      "color": "black",
+      "notes": "Heat resistant",
+      "is_public": false,
+      "is_active": true,
+      "title_fa": null
+    },
+    {
+      "id": "tpu_black",
+      "name": "TPU (95A)",
+      "price_per_kg": 2480000.0,
+      "waste_pct": 0.08,
+      "density_g_cm3": 1.24,
+      "color": "black",
+      "notes": "Flexible",
+      "is_public": false,
+      "is_active": true,
+      "title_fa": null
+    },
+    {
+      "id": "pla_plus_olive_green",
+      "name": "PLA +",
+      "price_per_kg": 1650000.0,
+      "waste_pct": 0.05,
+      "density_g_cm3": 1.24,
+      "color": "Olive Green",
+      "notes": "General purpose",
+      "is_public": false,
+      "is_active": true,
+      "title_fa": null
+    },
+    {
+      "id": "pla_plus_pine_green",
+      "name": "PLA +",
+      "price_per_kg": 1650000.0,
+      "waste_pct": 0.05,
+      "density_g_cm3": 1.24,
+      "color": "Pine Green",
+      "notes": "General purpose",
+      "is_public": false,
+      "is_active": true,
+      "title_fa": null
+    },
+    {
+      "id": "petg_white_gp",
+      "name": "PETG",
+      "price_per_kg": 1650000.0,
+      "waste_pct": 0.07,
+      "density_g_cm3": 1.24,
+      "color": "White",
+      "notes": "General purpose",
+      "is_public": false,
+      "is_active": true,
+      "title_fa": null
+    },
+    {
+      "id": "pla_silk_gold_blue_coper",
+      "name": "PLA SILK",
+      "price_per_kg": 1750000.0,
+      "waste_pct": 0.05,
+      "density_g_cm3": 1.24,
+      "color": "Gold blue coper",
+      "notes": "General purpose",
+      "is_public": false,
+      "is_active": true,
+      "title_fa": null
+    },
+    {
+      "id": "pla_silk_gold_silver_red",
+      "name": "PLA SILK",
+      "price_per_kg": 1750000.0,
+      "waste_pct": 0.05,
+      "density_g_cm3": 1.24,
+      "color": "gold silver red",
+      "notes": "General purpose",
+      "is_public": false,
+      "is_active": true,
+      "title_fa": null
+    },
+    {
+      "id": "wood_walnut",
+      "name": "WOOD",
+      "price_per_kg": 1750000.0,
+      "waste_pct": 0.07,
+      "density_g_cm3": 1.24,
+      "color": "walnut",
+      "notes": "General purpose",
+      "is_public": false,
+      "is_active": true,
+      "title_fa": null
+    },
+    {
+      "id": "wood_dark_mahaguni",
+      "name": "WOOD",
+      "price_per_kg": 1740000.0,
+      "waste_pct": 0.07,
+      "density_g_cm3": 1.24,
+      "color": "DARK MAHAGUNI",
+      "notes": "General purpose",
+      "is_public": false,
+      "is_active": true,
+      "title_fa": null
+    },
+    {
+      "id": "pla_mate_white",
+      "name": "PLA MATE",
+      "price_per_kg": 1690000.0,
+      "waste_pct": 0.05,
+      "density_g_cm3": 1.24,
+      "color": "white",
+      "notes": "General purpose",
+      "is_public": false,
+      "is_active": true,
+      "title_fa": null
+    },
+    {
+      "id": "pla_mate_blue",
+      "name": "PLA MATE",
+      "price_per_kg": 1690000.0,
+      "waste_pct": 0.05,
+      "density_g_cm3": 1.24,
+      "color": "blue",
+      "notes": "General purpose",
+      "is_public": false,
+      "is_active": true,
+      "title_fa": null
+    },
+    {
+      "id": "pla_mate_lavander_purple",
+      "name": "PLA MATE",
+      "price_per_kg": 1690000.0,
+      "waste_pct": 0.05,
+      "density_g_cm3": 1.24,
+      "color": "lavander purple",
+      "notes": "General purpose",
+      "is_public": false,
+      "is_active": true,
+      "title_fa": null
+    },
+    {
+      "id": "pla_fast_white",
+      "name": "PLA Fast",
+      "price_per_kg": 1870000.0,
+      "waste_pct": 0.05,
+      "density_g_cm3": 1.24,
+      "color": "white",
+      "notes": "",
+      "is_public": false,
+      "is_active": true,
+      "title_fa": null
+    },
+    {
+      "id": "petg_transparent",
+      "name": "petg transparent",
+      "price_per_kg": 2000000.0,
+      "waste_pct": 0.05,
+      "density_g_cm3": 1.24,
+      "color": "TRANSPARENT",
+      "notes": "",
+      "is_public": false,
+      "is_active": true,
+      "title_fa": null
+    }
   ],
   "machines": [
     {
       "id": "anycubic_kobra_s1_combo",
       "name": "Anycubic Kobra S1 combo",
-      "power_w": 120,
-      "purchase_price": 94000000,
-      "life_hours": 5000,
-      "maintenance_pct": 0.05
+      "power_w": 120.0,
+      "purchase_price": 94000000.0,
+      "life_hours": 5000.0,
+      "maintenance_pct": 0.05,
+      "is_active": true
     },
     {
       "id": "anycubic_kobra_s1_barbod",
       "name": "Anycubic Kobra S1",
-      "power_w": 120,
-      "purchase_price": 75000000,
-      "life_hours": 5000,
-      "maintenance_pct": 0.05
+      "power_w": 120.0,
+      "purchase_price": 75000000.0,
+      "life_hours": 5000.0,
+      "maintenance_pct": 0.05,
+      "is_active": true
     },
     {
       "id": "sunlu_t3",
       "name": "Sunlu t3",
-      "power_w": 120,
-      "purchase_price": 23000000,
-      "life_hours": 3000,
-      "maintenance_pct": 0.05
+      "power_w": 120.0,
+      "purchase_price": 23000000.0,
+      "life_hours": 3000.0,
+      "maintenance_pct": 0.05,
+      "is_active": true
     }
   ]
 }

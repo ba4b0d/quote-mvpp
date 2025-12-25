@@ -6,6 +6,8 @@ import io
 import zipfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from threading import Lock
+from typing import Any
 from datetime import datetime, timedelta
 
 import numpy as np
@@ -21,7 +23,7 @@ from fastapi import (
 )
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from passlib.context import CryptContext
 from jose import jwt, JWTError
 
@@ -55,13 +57,13 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 bearer = HTTPBearer(auto_error=False)
 
 
-def _parse_staff_users() -> dict[str, str]:
+def _parse_users_env(env_name: str) -> dict[str, str]:
     """
-    STAFF_USERS env format: user1:hash,user2:hash
+    USERS env format: user1:hash,user2:hash
     Example:
       STAFF_USERS=ba4b0d:$2b$12$...,negin:$2b$12$...
     """
-    raw = os.getenv("STAFF_USERS", "") or ""
+    raw = os.getenv(env_name, "") or ""
     out: dict[str, str] = {}
     for part in raw.split(","):
         part = part.strip()
@@ -75,16 +77,20 @@ def _parse_staff_users() -> dict[str, str]:
     return out
 
 
-STAFF_USERS = _parse_staff_users()
+# Staff users (can quote/estimate)
+STAFF_USERS = _parse_users_env("STAFF_USERS")
+
+# Admin users (can edit config). Optional; if empty, no one can access /admin.
+ADMIN_USERS = _parse_users_env("ADMIN_USERS")
 
 
-def create_access_token(username: str) -> str:
+def create_access_token(username: str, role: str) -> str:
     exp = datetime.utcnow() + timedelta(minutes=JWT_EXPIRE_MINUTES)
-    payload = {"sub": username, "role": "staff", "exp": exp}
+    payload = {"sub": username, "role": role, "exp": exp}
     return jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALG)
 
 
-def get_current_staff(creds: HTTPAuthorizationCredentials = Depends(bearer)) -> str:
+def get_current_user(creds: HTTPAuthorizationCredentials = Depends(bearer)) -> dict:
     if creds is None:
         raise HTTPException(
             status_code=401,
@@ -94,22 +100,34 @@ def get_current_staff(creds: HTTPAuthorizationCredentials = Depends(bearer)) -> 
     token = creds.credentials
     try:
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALG])
-        if payload.get("role") != "staff":
-            raise HTTPException(status_code=403, detail="Forbidden")
         username = payload.get("sub")
-        if not username:
+        role = payload.get("role")
+        if not username or not role:
             raise HTTPException(
                 status_code=401,
                 detail="Invalid token",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        return str(username)
+        return {"username": str(username), "role": str(role)}
     except JWTError:
         raise HTTPException(
             status_code=401,
             detail="Invalid token",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+
+def get_current_staff(user=Depends(get_current_user)) -> str:
+    # staff OR admin can access staff routes
+    if user.get("role") not in ("staff", "admin"):
+        raise HTTPException(status_code=403, detail="Forbidden")
+    return str(user["username"])
+
+
+def get_current_admin(user=Depends(get_current_user)) -> str:
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Forbidden")
+    return str(user["username"])
 
 
 # ----------------------------
@@ -127,6 +145,38 @@ app.add_middleware(
 )
 
 DATA_PATH = Path(__file__).parent / "data.json"
+BACKUP_DIR = Path(__file__).parent / "backups"
+AUDIT_LOG_PATH = BACKUP_DIR / "audit.jsonl"
+
+CONFIG_LOCK = Lock()
+
+
+def _atomic_write_json(path: Path, payload: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    tmp.replace(path)
+
+
+def save_data(new_data: dict, actor: str) -> None:
+    """Atomically save config with backup + audit log."""
+    with CONFIG_LOCK:
+        BACKUP_DIR.mkdir(parents=True, exist_ok=True)
+        ts = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+        if DATA_PATH.exists():
+            backup_path = BACKUP_DIR / f"data.{ts}.{actor}.json"
+            backup_path.write_text(DATA_PATH.read_text(encoding="utf-8"), encoding="utf-8")
+
+        _atomic_write_json(DATA_PATH, new_data)
+
+        # Append audit record (best-effort)
+        try:
+            AUDIT_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+            rec = {"ts": ts, "actor": actor, "action": "save_config"}
+            with AUDIT_LOG_PATH.open("a", encoding="utf-8") as f:
+                f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+        except Exception:
+            pass
 
 
 def load_data() -> dict:
@@ -135,9 +185,90 @@ def load_data() -> dict:
     return json.loads(DATA_PATH.read_text(encoding="utf-8"))
 
 
+
+def _normalize_bool(v, default: bool) -> bool:
+    if isinstance(v, bool):
+        return v
+    if v is None:
+        return default
+    if isinstance(v, (int, float)):
+        return bool(v)
+    s = str(v).strip().lower()
+    if s in ("1", "true", "yes", "on"):
+        return True
+    if s in ("0", "false", "no", "off"):
+        return False
+    return default
+
+
+def _validate_admin_config(payload: AdminConfigPayload) -> dict:
+    # Ensure unique IDs
+    mat_ids = [m.id for m in payload.materials]
+    if len(mat_ids) != len(set(mat_ids)):
+        raise HTTPException(400, "Duplicate material id detected")
+
+    mc_ids = [m.id for m in payload.machines]
+    if len(mc_ids) != len(set(mc_ids)):
+        raise HTTPException(400, "Duplicate machine id detected")
+
+    # Normalize toggles for backward-compat (in case UI sends null/strings)
+    mats_out = []
+    for m in payload.materials:
+        d = m.model_dump()
+        d["is_public"] = _normalize_bool(d.get("is_public"), True)
+        d["is_active"] = _normalize_bool(d.get("is_active"), True)
+        mats_out.append(d)
+
+    mcs_out = []
+    for mc in payload.machines:
+        d = mc.model_dump()
+        d["is_active"] = _normalize_bool(d.get("is_active"), True)
+        mcs_out.append(d)
+
+    cfg = {
+        "settings": dict(payload.settings),
+        "materials": mats_out,
+        "machines": mcs_out,
+    }
+    return cfg
+
+
 # ----------------------------
 # Models
 # ----------------------------
+
+class MaterialItem(BaseModel):
+    model_config = ConfigDict(extra="allow")
+    id: str
+    name: str
+    price_per_kg: float
+    waste_pct: float = 0
+    density_g_cm3: float | None = None
+    color: str = ""
+    notes: str = ""
+    # Admin toggles
+    is_public: bool = True
+    is_active: bool = True
+    title_fa: str | None = None
+
+
+class MachineItem(BaseModel):
+    model_config = ConfigDict(extra="allow")
+    id: str
+    name: str
+    power_w: float
+    purchase_price: float
+    life_hours: float
+    maintenance_pct: float = 0.0
+    is_active: bool = True
+
+
+class AdminConfigPayload(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    settings: dict[str, Any]
+    materials: list[MaterialItem]
+    machines: list[MachineItem]
+
 class QuoteRequest(BaseModel):
     material_id: str
     machine_id: str
@@ -450,6 +581,13 @@ def quote(req: QuoteRequest):
 # ----------------------------
 @app.post("/auth/login")
 def auth_login(req: LoginRequest):
+    # Admin first, then staff
+    if ADMIN_USERS:
+        stored_hash = ADMIN_USERS.get(req.username)
+        if stored_hash and pwd_context.verify(req.password, stored_hash):
+            token = create_access_token(req.username, role="admin")
+            return {"access_token": token, "token_type": "bearer", "role": "admin"}
+
     users = STAFF_USERS
     if not users:
         raise HTTPException(500, "STAFF_USERS not configured")
@@ -458,14 +596,43 @@ def auth_login(req: LoginRequest):
     if not stored_hash or not pwd_context.verify(req.password, stored_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    token = create_access_token(req.username)
-    return {"access_token": token, "token_type": "bearer"}
+    token = create_access_token(req.username, role="staff")
+    return {"access_token": token, "token_type": "bearer", "role": "staff"}
 
 
 @app.get("/auth/me")
-def auth_me(username: str = Depends(get_current_staff)):
-    return {"ok": True, "username": username, "role": "staff"}
+def auth_me(user=Depends(get_current_user)):
+    return {"ok": True, "username": user["username"], "role": user["role"]}
 
+
+
+# ----------------------------
+# Admin Routes (Protected)
+# ----------------------------
+@app.get("/admin/config")
+def admin_get_config(username: str = Depends(get_current_admin)):
+    return load_data()
+
+
+@app.put("/admin/config")
+def admin_put_config(payload: AdminConfigPayload, username: str = Depends(get_current_admin)):
+    cfg = _validate_admin_config(payload)
+    save_data(cfg, actor=username)
+    return {"ok": True}
+
+
+@app.get("/admin/audit")
+def admin_audit(username: str = Depends(get_current_admin)):
+    if not AUDIT_LOG_PATH.exists():
+        return {"entries": []}
+    lines = AUDIT_LOG_PATH.read_text(encoding="utf-8").splitlines()[-200:]
+    entries = []
+    for ln in lines:
+        try:
+            entries.append(json.loads(ln))
+        except Exception:
+            continue
+    return {"entries": entries}
 
 # ----------------------------
 # Staff Routes (Protected)
