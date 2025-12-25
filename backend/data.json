@@ -20,8 +20,8 @@
 
     { "id": "pla_silk_gold_black", "name": "PLA silk", "price_per_kg": 1750000, "waste_pct": 0.05, "density_g_cm3": 1.24, "color": "gold black", "notes": "General purpose" },
 
-    { "id": "petg_black_hr", "name": "PETG", "price_per_kg": 1750000, "waste_pct": 0.07, "density_g_cm3": 1.24, "color": "black", "notes": "Heat resistant" },
-    { "id": "tpu_95a_black", "name": "TPU (95A)", "price_per_kg": 2480000, "waste_pct": 0.08, "density_g_cm3": 1.24, "color": "black", "notes": "Flexible" },
+    { "id": "petg_black", "name": "PETG", "price_per_kg": 1750000, "waste_pct": 0.07, "density_g_cm3": 1.24, "color": "black", "notes": "Heat resistant" },
+    { "id": "tpu_black", "name": "TPU (95A)", "price_per_kg": 2480000, "waste_pct": 0.08, "density_g_cm3": 1.24, "color": "black", "notes": "Flexible" },
 
     { "id": "pla_plus_olive_green", "name": "PLA +", "price_per_kg": 1650000, "waste_pct": 0.05, "density_g_cm3": 1.24, "color": "Olive Green", "notes": "General purpose" },
     { "id": "pla_plus_pine_green", "name": "PLA +", "price_per_kg": 1650000, "waste_pct": 0.05, "density_g_cm3": 1.24, "color": "Pine Green", "notes": "General purpose" },
