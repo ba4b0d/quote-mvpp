@@ -1,14 +1,41 @@
-fastapi==0.115.5
-uvicorn==0.40.0
+# quote-mvpp v2 - Backend Requirements
 
-python-dotenv==1.0.1
-python-jose[cryptography]==3.5.0
-passlib==1.7.4
-bcrypt==3.2.2
+# Web Framework
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
 
-numpy==2.2.6
-trimesh==4.10.1
+# Data Validation
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
 
-python-multipart==0.0.12
-pydantic==2.10.4
-pydantic-settings==2.7.0
+# Database
+sqlalchemy>=2.0.0
+alembic>=1.13.0
+
+# Async
+aiosqlite>=0.19.0
+
+# Authentication
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+
+# 3D Processing
+trimesh>=3.24.0
+numpy>=1.26.0
+
+# Configuration
+python-dotenv>=1.0.0
+
+# Logging
+loguru>=0.7.0
+
+# Testing
+pytest>=7.4.0
+pytest-asyncio>=0.23.0
+httpx>=0.26.0
+
+# Development
+black>=23.0.0
+isort>=5.12.0
+flake8>=7.0.0
+mypy>=1.8.0
