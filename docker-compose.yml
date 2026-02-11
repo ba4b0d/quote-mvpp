@@ -1,0 +1,30 @@
+# quote-mvpp v2 - Docker Compose
+# For development with hot-reloading
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app/backend
+    environment:
+      - PYTHONPATH=/app
+    command: uvicorn backend.app.main:app --reload --host 0.0.0.0 --port 8000
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend-dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app/frontend
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    # Uncomment to use frontend-dev Dockerfile below
+
+# Alternative: Use this for just the backend API
+# docker compose up backend
