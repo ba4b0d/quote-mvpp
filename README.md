@@ -6,6 +6,7 @@
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
 ![React](https://img.shields.io/badge/React-18-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.109-red)
+![Docker](https://img.shields.io/badge/Docker-Ready-blue)
 
 ## 🎯 What's New in v2
 
@@ -15,14 +16,27 @@
 | **Database** | JSON Files | SQLite + SQLAlchemy |
 | **3D Analysis** | Basic | trimesh + Accurate Algorithm |
 | **Frontend** | Plain React | React + Vite + TypeScript |
-| **Styling** | Basic CSS | Modern Dark Theme + Tailwind |
+| **Styling** | Basic CSS | Modern Dark Theme |
 | **Auth** | Basic | JWT + bcrypt |
 | **Admin Panel** | Simple | Full Dashboard |
 | **3D Preview** | None | Three.js @react-three/fiber |
+| **Docker** | ❌ | ✅ Ready |
 
 ## 🚀 Quick Start
 
-### Option 1: Local Development
+### Option 1: Docker (Recommended)
+
+```bash
+# Build and run all services
+docker-compose up --build -d
+
+# Access:
+# Frontend: http://localhost:5173
+# Backend API: http://localhost:8000
+# API Docs: http://localhost:8000/docs
+```
+
+### Option 2: Local Development
 
 ```bash
 # Clone the repository
@@ -49,15 +63,10 @@ npm run dev
 
 **Default Login:** `admin` / `admin123`
 
-### Option 2: Docker
+### Option 3: Single Command Start (Linux/Mac)
 
 ```bash
-# Build and run with Docker Compose
-docker-compose up --build
-
-# Or run individually
-docker build -t quote-mvpp .
-docker run -p 8000:8000 -p 5173:5173 quote-mvpp
+./start.sh
 ```
 
 ## 📁 Project Structure
@@ -69,6 +78,7 @@ quote-mvpp/
 ├── 📄 docker-compose.yml
 ├── 📄 Dockerfile
 ├── 📄 Dockerfile.frontend-dev
+├── 📄 start.sh
 │
 ├── 📁 backend/                 # FastAPI Backend
 │   ├── 📄 requirements.txt
@@ -110,6 +120,22 @@ quote-mvpp/
             └── 📄 globals.css       # Modern dark theme
 ```
 
+## 🐳 Docker Commands
+
+```bash
+# Build image
+docker build -t quote-mvpp .
+
+# Run container
+docker run -p 8000:8000 -p 5173:5173 quote-mvpp
+
+# Docker Compose
+docker-compose up --build      # Build & start
+docker-compose up -d           # Start in background
+docker-compose down            # Stop all
+docker-compose logs -f         # View logs
+```
+
 ## 📊 Estimation Algorithm
 
 Our accurate 3D printing estimation is documented in [docs/ESTIMATION_ALGORITHM.md](docs/ESTIMATION_ALGORITHM.md)
@@ -134,6 +160,7 @@ Our accurate 3D printing estimation is documented in [docs/ESTIMATION_ALGORITHM.
 | **3D Preview** | Three.js + @react-three/fiber |
 | **State Management** | Zustand |
 | **Forms** | React Hook Form + Zod |
+| **Containerization** | Docker + Docker Compose |
 
 ## 📡 API Endpoints
 
