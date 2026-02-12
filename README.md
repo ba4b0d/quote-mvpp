@@ -1,9 +1,8 @@
-<<<<<<< Updated upstream
 # quote-mvpp v2 🆕
 
 **Modern 3D Printing Quotation System** - Built from scratch with better architecture, accurate estimation, and beautiful UI.
 
-![quote-mvpp v2](https://img.shields.io/badge/version-2.0.0-green)
+![version](https://img.shields.io/badge/version-2.0.0-green)
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
 ![React](https://img.shields.io/badge/React-18-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.109-red)
@@ -28,19 +27,12 @@
 ### Option 1: Docker (Recommended)
 
 ```bash
-# Build and run all services
 docker-compose up --build -d
-
-# Access:
-# Frontend: http://localhost:5173
-# Backend API: http://localhost:8000
-# API Docs: http://localhost:8000/docs
 ```
 
 ### Option 2: Local Development
 
 ```bash
-# Clone the repository
 git clone https://github.com/ba4b0d/quote-mvpp.git
 cd quote-mvpp
 
@@ -55,6 +47,22 @@ npm install
 npm run dev
 ```
 
+### Option 3: Server Deployment
+
+```bash
+# Clone and run deployment script
+git clone https://github.com/ba4b0d/quote-mvpp.git
+cd quote-mvpp
+
+# Configure
+cp .env.example .env
+nano .env
+
+# Deploy
+chmod +x deploy.sh
+./deploy.sh
+```
+
 **Access:**
 - Frontend: http://localhost:5173
 - Quote Page: http://localhost:5173/quote
@@ -64,104 +72,32 @@ npm run dev
 
 **Default Login:** `admin` / `admin123`
 
-### Option 3: Single Command Start (Linux/Mac)
-
-```bash
-./start.sh
-```
-
 ## 📁 Project Structure
 
 ```
 quote-mvpp/
-├── 📄 README.md
-├── 📄 DOCKER_README.md
-├── 📄 docker-compose.yml
-├── 📄 Dockerfile
-├── 📄 Dockerfile.frontend-dev
-├── 📄 start.sh
+├── deploy.sh              # Server deployment script
+├── quick-fix.sh           # Quick fix for existing servers
+├── .env.example           # Configuration template
+├── docker-compose.yml
+├── Dockerfile
 │
-├── 📁 backend/                 # FastAPI Backend
-│   ├── 📄 requirements.txt
-│   └── 📁 app/
-│       ├── 📄 main.py          # FastAPI app entry point
-│       ├── 📁 api/v1/
-│       │   ├── 📄 quote.py     # Quote endpoints
-│       │   ├── 📄 auth.py      # JWT authentication
-│       │   └── 📄 materials.py # Materials & settings
-│       ├── 📁 core/
-│       │   ├── 📄 config.py    # Settings (Pydantic)
-│       │   ├── 📄 database.py  # SQLite + SQLAlchemy
-│       │   └── 📄 security.py  # JWT + bcrypt
-│       └── 📁 services/
-│           ├── 📄 estimation.py    # Quote logic
-│           ├── 📄 mesh_analysis.py # 3D file analysis (trimesh)
-│           └── 📄 pricing.py       # Cost calculations
+├── backend/               # FastAPI Backend
+│   ├── app/
+│   │   ├── main.py       # FastAPI app entry point
+│   │   ├── api/v1/        # API endpoints
+│   │   ├── core/          # Config, database, security
+│   │   └── services/     # Estimation, mesh analysis, pricing
+│   └── requirements.txt
 │
-└── 📁 frontend/                # React + Vite Frontend
-    ├── 📄 package.json
-    ├── 📄 vite.config.ts
-    ├── 📄 index.html
-    └── 📁 src/
-        ├── 📄 App.tsx
-        ├── 📄 main.tsx
-        ├── 📁 pages/
-        │   ├── 📄 HomePage.tsx      # Landing page
-        │   ├── 📄 QuotePage.tsx     # Quote calculator
-        │   ├── 📄 AdminPage.tsx     # Admin dashboard
-        │   └── 📄 LoginPage.tsx     # Staff login
-        ├── 📁 components/
-        │   ├── 📄 ModelViewer.tsx   # 3D model preview
-        │   ├── 📄 Layout.tsx
-        │   └── 📄 LoadingScreen.tsx
-        ├── 📁 hooks/
-        │   ├── 📄 useAuth.ts        # Auth store (Zustand)
-        │   └── 📄 useQuoteStore.ts  # Quote store (Zustand)
-        └── 📁 styles/
-            └── 📄 globals.css       # Modern dark theme
+└── frontend/              # React + Vite Frontend
+    ├── src/
+    │   ├── pages/         # Home, Quote, Admin, Login
+    │   ├── components/   # ModelViewer, Layout, etc.
+    │   ├── hooks/         # useAuth, useQuoteStore
+    │   └── styles/        # Modern dark theme
+    └── package.json
 ```
-
-## 🐳 Docker Commands
-
-```bash
-# Build image
-docker build -t quote-mvpp .
-
-# Run container
-docker run -p 8000:8000 -p 5173:5173 quote-mvpp
-
-# Docker Compose
-docker-compose up --build      # Build & start
-docker-compose up -d           # Start in background
-docker-compose down            # Stop all
-docker-compose logs -f         # View logs
-```
-
-## 📊 Estimation Algorithm
-
-Our accurate 3D printing estimation is documented in [docs/ESTIMATION_ALGORITHM.md](docs/ESTIMATION_ALGORITHM.md)
-
-### Key Calculations
-
-1. **Volume Analysis** - `trimesh.volume` for accurate material needs
-2. **Print Time** - Layer-by-layer estimation
-3. **Support Material** - Overhang angle detection
-4. **Cost Breakdown** - Material + Electricity + Labor + Overhead + Markup
-
-## 🎨 Tech Stack
-
-| Layer | Technology |
-|-------|------------|
-| **Backend** | FastAPI + Python 3.11 |
-| **Database** | SQLite + SQLAlchemy |
-| **3D Processing** | trimesh + numpy |
-| **Authentication** | JWT + bcrypt |
-| **Frontend** | React 18 + Vite + TypeScript |
-| **Styling** | Custom CSS (no Tailwind dependency) |
-| **3D Preview** | Three.js + @react-three/fiber |
-| **State Management** | Zustand |
-| **Forms** | React Hook Form + Zod |
-| **Containerization** | Docker + Docker Compose |
 
 ## 📡 API Endpoints
 
@@ -172,51 +108,16 @@ Our accurate 3D printing estimation is documented in [docs/ESTIMATION_ALGORITHM.
 | POST | `/api/v1/quote/manual` | Manual input → quote |
 | GET | `/api/v1/quote/calculate` | Calculate from parameters |
 | GET | `/api/v1/materials` | List materials |
-| GET | `/api/v1/settings` | Get settings |
 | POST | `/api/v1/auth/login` | Staff login |
-| POST | `/api/v1/auth/verify` | Verify token |
-
-## 🎛️ Admin Panel
-
-- 📋 **Materials** - Add/Edit/Remove materials with prices
-- ⚙️ **Settings** - Configure electricity rate, markup, overhead
-- 📊 **Analytics** - Quote statistics (coming soon)
 
 ## 🛠️ Development
 
-### Running Tests
-
 ```bash
 # Backend tests
-cd backend
-pytest
+cd backend && pytest
 
 # Frontend tests
-cd frontend
-npm test
-```
-
-### Adding New Materials
-
-Edit `backend/app/core/database.py` in the `seed_materials()` function:
-
-```python
-default_materials = [
-    {"name": "PLA Black", "price_per_kg": 1650000, "color": "Black"},
-    {"name": "Your New Material", "price_per_kg": 2000000, "color": "Blue"},
-]
-```
-
-### Configuration
-
-Edit `backend/app/core/config.py`:
-
-```python
-class Settings(BaseSettings):
-    ELECTRICITY_RATE_PER_KWH: int = 812  # IRT
-    DEFAULT_OVERHEAD_PCT: float = 0.3
-    DEFAULT_MARKUP_PCT: float = 2.0
-    COLORING_COST_PER_HOUR: int = 150000  # IRT
+cd frontend && npm test
 ```
 
 ## 📝 License
@@ -224,74 +125,9 @@ class Settings(BaseSettings):
 MIT License - Feel free to use and modify!
 
 ## 👨‍💻 Author
-=======
-# quote-mvpp v2 Deployment Scripts
 
-Easy deployment scripts for quote-mvpp v2 3D printing quotation system.
+**Barbod Marzban**
 
-## Quick Deploy
-
-```bash
-# Clone or download
-cd deploy-scripts
-
-# Configure
-cp .env.example .env
-nano .env  # Edit your server settings
-
-# Deploy
-chmod +x deploy.sh
-./deploy.sh
-```
-
-## Files
-
-| File | Description |
-|------|-------------|
-| `deploy.sh` | Full deployment script |
-| `quick-fix.sh` | Quick fix for existing server |
-| `.env.example` | Configuration template |
-
-## Configuration (.env)
-
-```bash
-DOMAIN=quote.3djat.com
-BACKEND_PORT=8001
-SSL_CERT_PATH=/etc/letsencrypt/live/$DOMAIN/fullchain.pem
-SSL_KEY_PATH=/etc/letsencrypt/live/$DOMAIN/privkey.pem
-PROJECT_DIR=/opt/quote-mvpp
-ADMIN_USERNAME=admin
-ADMIN_PASSWORD=admin123
-```
-
-## What it does
-
-1. Installs Node.js (if needed)
-2. Installs Python dependencies
-3. Builds frontend
-4. Creates nginx config
-5. Creates systemd service
-6. Starts all services
-
-## After Deployment
-
-```bash
-# Check status
-sudo systemctl status quote-mvpp
-
-# View logs
-sudo journalctl -u quote-mvpp -f
-
-# Restart
-sudo systemctl restart quote-mvpp
-```
-
-## Author
->>>>>>> Stashed changes
-
-Barbod Marzban
-
-<<<<<<< Updated upstream
 Built with ❤️ and 🦖 (Raya the AI assistant)
 
 ---
@@ -302,8 +138,3 @@ Built with ❤️ and 🦖 (Raya the AI assistant)
 - [FastAPI](https://fastapi.tiangolo.com/) - Modern Python web framework
 - [Three.js](https://threejs.org/) - 3D graphics
 - [Vite](https://vitejs.dev/) - Next generation frontend tooling
-=======
-## License
-
-MIT
->>>>>>> Stashed changes
