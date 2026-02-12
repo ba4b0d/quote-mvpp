@@ -7,7 +7,7 @@ import AdminPage from './pages/AdminPage'
 import LoginPage from './pages/LoginPage'
 import LoadingScreen from './components/LoadingScreen'
 
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
+function ProtectedRoute({ children }) {
   const { isAuthenticated, isLoading } = useAuthStore()
   
   if (isLoading) return <LoadingScreen />
