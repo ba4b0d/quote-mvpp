@@ -99,25 +99,77 @@ quote-mvpp/
     └── package.json
 ```
 
-## 📡 API Endpoints
+## 📡 API Examples (curl)
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/health` | Health check |
-| POST | `/api/v1/quote/estimate` | Upload file → quote |
-| POST | `/api/v1/quote/manual` | Manual input → quote |
-| GET | `/api/v1/quote/calculate` | Calculate from parameters |
-| GET | `/api/v1/materials` | List materials |
-| POST | `/api/v1/auth/login` | Staff login |
-
-## 🛠️ Development
-
+### Health Check
 ```bash
-# Backend tests
-cd backend && pytest
+curl http://localhost:8001/health
+```
 
-# Frontend tests
-cd frontend && npm test
+Response:
+```json
+{"status":"healthy","version":"2.0.0","name":"quote-mvpp v2"}
+```
+
+### Login (Get JWT Token)
+```bash
+curl -X POST http://localhost:8001/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"admin123"}'
+```
+
+Response:
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIs...",
+  "token_type": "bearer",
+  "role": "admin"
+}
+```
+
+### Get Materials
+```bash
+curl http://localhost:8001/api/v1/materials
+```
+
+### Calculate Quote
+```bash
+curl "http://localhost:8001/api/v1/quote/calculate?volume_cm3=10&material_id=pla_black&layer_height=0.2&infill=0.2"
+```
+
+### Estimate from File (with JWT)
+```bash
+# First login to get token, then:
+TOKEN="your-jwt-token"
+
+curl -X POST http://localhost:8001/api/v1/quote/estimate \
+  -H "Authorization: Bearer $TOKEN" \
+  -F "file=@model.stl" \
+  -F "material_id=pla_black" \
+  -F "layer_height=0.2" \
+  -F "infill=0.2"
+```
+
+## 🧪 Testing
+
+### Backend Tests
+```bash
+cd backend
+pip install pytest pytest-asyncio
+pytest
+```
+
+### Frontend Tests
+```bash
+cd frontend
+npm install
+npm test
+```
+
+### Code Quality (ESLint + Prettier)
+```bash
+npm run lint      # Check code style
+npm run format    # Auto-format code
 ```
 
 ## 📝 License
