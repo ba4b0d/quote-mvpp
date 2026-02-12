@@ -15,7 +15,7 @@
 | **Backend** | Basic Flask | FastAPI + Services Layer |
 | **Database** | JSON Files | SQLite + SQLAlchemy |
 | **3D Analysis** | Basic | trimesh + Accurate Algorithm |
-| **Frontend** | Plain React | React + Vite + TypeScript |
+| **Frontend** | Plain React | React + Vite + **JavaScript** |
 | **Styling** | Basic CSS | Modern Dark Theme |
 | **Auth** | Basic | JWT + bcrypt |
 | **Admin Panel** | Simple | Full Dashboard |
