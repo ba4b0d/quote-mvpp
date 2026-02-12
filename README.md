@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 # quote-mvpp v2 🆕
 
 **Modern 3D Printing Quotation System** - Built from scratch with better architecture, accurate estimation, and beautiful UI.
@@ -223,9 +224,74 @@ class Settings(BaseSettings):
 MIT License - Feel free to use and modify!
 
 ## 👨‍💻 Author
+=======
+# quote-mvpp v2 Deployment Scripts
 
-**Barbod Marzban** - https://github.com/ba4b0d
+Easy deployment scripts for quote-mvpp v2 3D printing quotation system.
 
+## Quick Deploy
+
+```bash
+# Clone or download
+cd deploy-scripts
+
+# Configure
+cp .env.example .env
+nano .env  # Edit your server settings
+
+# Deploy
+chmod +x deploy.sh
+./deploy.sh
+```
+
+## Files
+
+| File | Description |
+|------|-------------|
+| `deploy.sh` | Full deployment script |
+| `quick-fix.sh` | Quick fix for existing server |
+| `.env.example` | Configuration template |
+
+## Configuration (.env)
+
+```bash
+DOMAIN=quote.3djat.com
+BACKEND_PORT=8001
+SSL_CERT_PATH=/etc/letsencrypt/live/$DOMAIN/fullchain.pem
+SSL_KEY_PATH=/etc/letsencrypt/live/$DOMAIN/privkey.pem
+PROJECT_DIR=/opt/quote-mvpp
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=admin123
+```
+
+## What it does
+
+1. Installs Node.js (if needed)
+2. Installs Python dependencies
+3. Builds frontend
+4. Creates nginx config
+5. Creates systemd service
+6. Starts all services
+
+## After Deployment
+
+```bash
+# Check status
+sudo systemctl status quote-mvpp
+
+# View logs
+sudo journalctl -u quote-mvpp -f
+
+# Restart
+sudo systemctl restart quote-mvpp
+```
+
+## Author
+>>>>>>> Stashed changes
+
+Barbod Marzban
+
+<<<<<<< Updated upstream
 Built with ❤️ and 🦖 (Raya the AI assistant)
 
 ---
@@ -236,3 +302,8 @@ Built with ❤️ and 🦖 (Raya the AI assistant)
 - [FastAPI](https://fastapi.tiangolo.com/) - Modern Python web framework
 - [Three.js](https://threejs.org/) - 3D graphics
 - [Vite](https://vitejs.dev/) - Next generation frontend tooling
+=======
+## License
+
+MIT
+>>>>>>> Stashed changes
