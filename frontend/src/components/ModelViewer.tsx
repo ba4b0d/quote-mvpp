@@ -1,6 +1,7 @@
-import { useRef, useState, useCallback, useMemo, Suspense } from 'react'
-import { Canvas, useLoader } from '@react-three/fiber'
+import { useRef, useState, useCallback, useMemo, Suspense, useEffect } from 'react'
+import { Canvas, useLoader, useThree } from '@react-three/fiber'
 import { OrbitControls, Stage, useProgress, Html, Center } from '@react-three/drei'
+import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js'
 import * as THREE from 'three'
 
 interface ModelViewerProps {
@@ -15,15 +16,35 @@ interface ModelMetrics {
   dimensions?: { x: number; y: number; z: number }
 }
 
-function ModelScene({ onMetricsChange }: { onMetricsChange?: (metrics: ModelMetrics) => void }) {
-  const geometry = useMemo(() => new THREE.BoxGeometry(2, 2, 2), [])
-  const material = useMemo(() => new THREE.MeshStandardMaterial({
-    color: 0x6C63FF,
-    metalness: 0.3,
-    roughness: 0.4,
-  }), [])
+function STLModel({ url, onMetricsChange }: { url: string; onMetricsChange?: (metrics: ModelMetrics) => void }) {
+  const geometry = useLoader(STLLoader, url)
+  
+  useEffect(() => {
+    if (geometry && onMetricsChange) {
+      geometry.computeBoundingBox()
+      const box = geometry.boundingBox!
+      const size = new THREE.Vector3()
+      box.getSize(size)
+      
+      onMetricsChange({
+        vertices: geometry.attributes.position.count,
+        faces: geometry.index ? geometry.index.count / 3 : geometry.attributes.position.count / 3,
+        dimensions: { x: size.x, y: size.y, z: size.z }
+      })
+    }
+  }, [geometry, onMetricsChange])
 
-  return <mesh geometry={geometry} material={material} />
+  return (
+    <Center>
+      <mesh geometry={geometry} castShadow receiveShadow>
+        <meshStandardMaterial
+          color={0x6C63FF}
+          metalness={0.2}
+          roughness={0.6}
+        />
+      </mesh>
+    </Center>
+  )
 }
 
 function Loader() {
@@ -44,10 +65,7 @@ export default function ModelViewer({ fileUrl, onMetricsChange }: ModelViewerPro
   const [error, setError] = useState<string | null>(null)
   const [fileName, setFileName] = useState<string | null>(null)
 
-  const handleFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) return
-
+  const handleFile = useCallback((file: File) => {
     const validTypes = ['.stl', '.3mf', '.obj']
     const fileExt = '.' + file.name.split('.').pop()?.toLowerCase()
 
@@ -56,38 +74,25 @@ export default function ModelViewer({ fileUrl, onMetricsChange }: ModelViewerPro
       return
     }
 
+    // Revoke previous URL to avoid memory leaks
+    if (modelUrl) URL.revokeObjectURL(modelUrl)
+    
     const url = URL.createObjectURL(file)
     setModelUrl(url)
     setFileName(file.name)
     setError(null)
+  }, [modelUrl])
 
-    if (onMetricsChange) {
-      onMetricsChange({ vertices: 0, faces: 0 })
-    }
-  }, [onMetricsChange])
+  const handleFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) handleFile(file)
+  }, [handleFile])
 
   const handleDrop = useCallback((event: React.DragEvent) => {
     event.preventDefault()
     const file = event.dataTransfer.files?.[0]
-    if (!file) return
-
-    const validTypes = ['.stl', '.3mf', '.obj']
-    const fileExt = '.' + file.name.split('.').pop()?.toLowerCase()
-
-    if (!validTypes.includes(fileExt)) {
-      setError('فرمت فایل نامعتبر است. فایل‌های STL، 3MF و OBJ پذیرفته می‌شوند.')
-      return
-    }
-
-    const url = URL.createObjectURL(file)
-    setModelUrl(url)
-    setFileName(file.name)
-    setError(null)
-
-    if (onMetricsChange) {
-      onMetricsChange({ vertices: 0, faces: 0 })
-    }
-  }, [onMetricsChange])
+    if (file) handleFile(file)
+  }, [handleFile])
 
   // If no model loaded, show placeholder
   if (!modelUrl) {
@@ -95,22 +100,16 @@ export default function ModelViewer({ fileUrl, onMetricsChange }: ModelViewerPro
       <div className="w-full h-[400px] bg-[var(--surface)] rounded-xl overflow-hidden">
         <div
           className="w-full h-full flex flex-col items-center justify-center 
-                     border-2 border-dashed border-[var(--surface-light)] 
+                     border-2 border-dashed border-[var(--border)] 
                      rounded-xl m-0 p-8 cursor-pointer hover:border-[var(--primary)]
                      transition-all duration-300 group"
           onClick={() => fileInputRef.current?.click()}
           onDrop={handleDrop}
           onDragOver={(e) => e.preventDefault()}
         >
-          <div className="text-6xl mb-4 group-hover:scale-110 transition-transform">
-            📦
-          </div>
-          <p className="text-[var(--text-secondary)] text-lg mb-2">
-            فایل سه‌بعدی خود را بارگذاری کنید
-          </p>
-          <p className="text-[var(--text-secondary)] text-sm">
-            فایل STL، 3MF یا OBJ را بکشید و رها کنید یا کلیک کنید
-          </p>
+          <div className="text-6xl mb-4 group-hover:scale-110 transition-transform">📦</div>
+          <p className="text-[var(--text-secondary)] text-lg mb-2">فایل سه‌بعدی خود را بارگذاری کنید</p>
+          <p className="text-[var(--text-secondary)] text-sm">STL، 3MF یا OBJ</p>
           <input
             ref={fileInputRef}
             type="file"
@@ -120,10 +119,8 @@ export default function ModelViewer({ fileUrl, onMetricsChange }: ModelViewerPro
           />
         </div>
         {error && (
-          <div className="bg-red-500/10 border border-red-500 text-red-500 
-                        rounded-lg p-4 m-4 flex items-center gap-2">
-            <span className="text-xl">⚠️</span>
-            {error}
+          <div className="bg-red-500/10 border border-red-500 text-red-500 rounded-lg p-4 m-4">
+            ⚠️ {error}
           </div>
         )}
       </div>
@@ -136,20 +133,23 @@ export default function ModelViewer({ fileUrl, onMetricsChange }: ModelViewerPro
       <Canvas
         shadows
         dpr={[1, 2]}
-        camera={{ position: [0, 0, 10], fov: 50 }}
+        camera={{ position: [0, 0, 100], fov: 50 }}
       >
+        <ambientLight intensity={0.5} />
+        <directionalLight position={[10, 10, 10]} intensity={1} castShadow />
         <Suspense fallback={<Loader />}>
           <Stage environment="city" intensity={0.6}>
-            <ModelScene onMetricsChange={onMetricsChange} />
+            <STLModel url={modelUrl} onMetricsChange={onMetricsChange} />
           </Stage>
-          <OrbitControls makeDefault autoRotate autoRotateSpeed={0.5} />
+          <OrbitControls makeDefault autoRotate autoRotateSpeed={1} />
         </Suspense>
       </Canvas>
 
       {/* Overlay controls */}
-      <div className="absolute top-4 left-4 flex gap-2">
+      <div className="absolute top-4 right-4 flex gap-2">
         <button
           onClick={() => {
+            if (modelUrl) URL.revokeObjectURL(modelUrl)
             setModelUrl(null)
             setFileName(null)
             if (fileInputRef.current) fileInputRef.current.value = ''

@@ -61,8 +61,10 @@ async def estimate_from_file(
         )
     
     try:
+        # Read file bytes (await the async read)
+        file_bytes = await file.read()
         result = estimation_service.estimate_from_file(
-            file_obj=file,
+            file_obj=file_bytes,
             material_id=material_id,
             material_prices=MATERIAL_PRICES,
             settings=DEFAULT_SETTINGS,
