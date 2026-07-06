@@ -12,10 +12,8 @@ COPY frontend/package*.json ./
 # Install dependencies
 RUN npm ci
 
-# Copy frontend source
-COPY frontend/ ./src/
-COPY frontend/vite.config.js ./
-COPY frontend/index.html ./
+# Copy everything
+COPY frontend/ ./
 
 # Build for production
 RUN npm run build
