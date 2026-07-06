@@ -39,12 +39,12 @@ export default function QuotePage() {
   
   const handleCalculate = async () => {
     if (mode === 'file' && !selectedFile) {
-      toast.error('Please select a file first')
+      toast.error('لطفاً ابتدا یک فایل انتخاب کنید')
       return
     }
     
     if (mode === 'manual' && (!manualGrams || !manualMinutes)) {
-      toast.error('Please enter grams and minutes')
+      toast.error('لطفاً گرم و دقیقه را وارد کنید')
       return
     }
     
@@ -57,9 +57,9 @@ export default function QuotePage() {
           minutes: parseFloat(manualMinutes)
         })
       }
-      toast.success('Quote calculated!')
+      toast.success('قیمت محاسبه شد!')
     } catch (error) {
-      toast.error('Error calculating quote')
+      toast.error('خطا در محاسبه قیمت')
     }
   }
   
@@ -70,12 +70,12 @@ export default function QuotePage() {
       className="container mx-auto px-4 py-8"
     >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left: File Upload & 3D Preview */}
+        {/* Right: File Upload & 3D Preview (RTL — right side first) */}
         <div className="space-y-6">
           <div className="card">
             <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
               <Upload className="w-5 h-5 text-[var(--primary)]" />
-              Upload 3D File
+              آپلود فایل سه‌بعدی
             </h2>
             
             <div
@@ -95,11 +95,11 @@ export default function QuotePage() {
               <label htmlFor="file-upload" className="cursor-pointer">
                 <div className="text-4xl mb-2">📦</div>
                 <p className="text-[var(--text-secondary)]">
-                  {selectedFile ? selectedFile.name : 'Drop STL/3MF file here or click to browse'}
+                  {selectedFile ? selectedFile.name : 'فایل STL/3MF را اینجا رها کنید یا کلیک کنید'}
                 </p>
                 {selectedFile && (
                   <p className="text-sm text-[var(--primary)] mt-2">
-                    {(selectedFile.size / 1024).toFixed(2)} KB
+                    {(selectedFile.size / 1024).toFixed(2)} کیلوبایت
                   </p>
                 )}
               </label>
@@ -110,25 +110,25 @@ export default function QuotePage() {
           <div className="card">
             <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
               <FileText className="w-5 h-5 text-[var(--primary)]" />
-              3D Preview
+              پیش‌نمایش سه‌بعدی
             </h2>
             <ModelViewer />
           </div>
         </div>
         
-        {/* Right: Options & Quote */}
+        {/* Left: Options & Quote (RTL — left side second) */}
         <div className="space-y-6">
           {/* Material Selection */}
           <div className="card">
             <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
               <Settings className="w-5 h-5 text-[var(--primary)]" />
-              Options
+              گزینه‌ها
             </h2>
             
             <div className="space-y-4">
               <div>
                 <label className="block text-sm text-[var(--text-secondary)] mb-2">
-                  Material
+                  متریال
                 </label>
                 <select
                   value={materialId}
@@ -138,18 +138,18 @@ export default function QuotePage() {
                   {materials.length > 0 ? (
                     materials.map((mat: any) => (
                       <option key={mat.id || mat.material_id} value={mat.id || mat.material_id}>
-                        {mat.name} - {mat.price_per_kg?.toLocaleString()} IRT/kg
+                        {mat.name} - {mat.price_per_kg?.toLocaleString()} تومان/کیلوگرم
                       </option>
                     ))
                   ) : (
-                    <option value="" disabled>Loading materials...</option>
+                    <option value="" disabled>در حال بارگذاری متریال‌ها...</option>
                   )}
                 </select>
               </div>
               
               <div>
                 <label className="block text-sm text-[var(--text-secondary)] mb-2">
-                  Layer Height: {layerHeight}mm
+                  ارتفاع لایه: {layerHeight}mm
                 </label>
                 <input
                   type="range"
@@ -164,7 +164,7 @@ export default function QuotePage() {
               
               <div>
                 <label className="block text-sm text-[var(--text-secondary)] mb-2">
-                  Infill: {(infill * 100).toFixed(0)}%
+                  درصد پر شدن: {(infill * 100).toFixed(0)}%
                 </label>
                 <input
                   type="range"
@@ -187,7 +187,7 @@ export default function QuotePage() {
                       : 'bg-[var(--surface-light)]'
                   }`}
                 >
-                  File Mode
+                  حالت فایل
                 </button>
                 <button
                   onClick={() => setMode('manual')}
@@ -197,7 +197,7 @@ export default function QuotePage() {
                       : 'bg-[var(--surface-light)]'
                   }`}
                 >
-                  Manual Input
+                  ورودی دستی
                 </button>
               </div>
               
@@ -205,25 +205,25 @@ export default function QuotePage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm text-[var(--text-secondary)] mb-2">
-                      Grams
+                      گرم
                     </label>
                     <input
                       type="number"
                       value={manualGrams}
                       onChange={(e) => setManualGrams(e.target.value)}
-                      placeholder="e.g., 150"
+                      placeholder="مثلاً ۱۵۰"
                       className="input"
                     />
                   </div>
                   <div>
                     <label className="block text-sm text-[var(--text-secondary)] mb-2">
-                      Minutes
+                      دقیقه
                     </label>
                     <input
                       type="number"
                       value={manualMinutes}
                       onChange={(e) => setManualMinutes(e.target.value)}
-                      placeholder="e.g., 180"
+                      placeholder="مثلاً ۱۸۰"
                       className="input"
                     />
                   </div>
@@ -239,7 +239,7 @@ export default function QuotePage() {
             className="btn-primary w-full flex items-center justify-center gap-2"
           >
             <Calculator className="w-5 h-5" />
-            {isLoading ? 'Calculating...' : 'Calculate Quote'}
+            {isLoading ? 'در حال محاسبه...' : 'محاسبه قیمت'}
           </button>
           
           {/* Quote Result */}
@@ -251,13 +251,13 @@ export default function QuotePage() {
             >
               <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
                 <DollarSign className="w-5 h-5 text-[var(--primary)]" />
-                Quote Result
+                نتیجه قیمت
               </h2>
               
               <div className="text-center mb-6">
-                <p className="text-[var(--text-secondary)] text-sm">Total Cost</p>
+                <p className="text-[var(--text-secondary)] text-sm">هزینه کل</p>
                 <p className="text-4xl font-bold gradient-text">
-                  {quoteResult.formatted?.total || `${quoteResult.costs?.total?.toLocaleString()} IRT`}
+                  {quoteResult.formatted?.total || `${quoteResult.costs?.total?.toLocaleString()} تومان`}
                 </p>
               </div>
               
@@ -265,20 +265,20 @@ export default function QuotePage() {
                 <div className="bg-[var(--surface-light)] rounded-lg p-4">
                   <div className="flex items-center gap-2 text-[var(--text-secondary)] mb-1">
                     <Clock className="w-4 h-4" />
-                    Print Time
+                    زمان چاپ
                   </div>
                   <p className="text-lg font-bold">
-                    {quoteResult.print_time?.hours || 0}h {quoteResult.print_time?.minutes || 0}m
+                    {quoteResult.print_time?.hours || 0} ساعت {quoteResult.print_time?.minutes || 0} دقیقه
                   </p>
                 </div>
                 
                 <div className="bg-[var(--surface-light)] rounded-lg p-4">
                   <div className="flex items-center gap-2 text-[var(--text-secondary)] mb-1">
                     <Package className="w-4 h-4" />
-                    Material
+                    متریال
                   </div>
                   <p className="text-lg font-bold">
-                    {quoteResult.mesh_metrics?.material_grams?.toFixed(0) || quoteResult.input?.material_grams?.toFixed(0)}g
+                    {quoteResult.mesh_metrics?.material_grams?.toFixed(0) || quoteResult.input?.material_grams?.toFixed(0)} گرم
                   </p>
                 </div>
               </div>
@@ -286,28 +286,28 @@ export default function QuotePage() {
               {/* Cost Breakdown */}
               <div className="mt-4 pt-4 border-t border-[var(--surface-light)]">
                 <h3 className="text-sm font-medium text-[var(--text-secondary)] mb-2">
-                  Cost Breakdown
+                  جزئیات هزینه
                 </h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span>Material</span>
-                    <span>{quoteResult.costs?.material_cost?.toLocaleString()} IRT</span>
+                    <span>متریال</span>
+                    <span>{quoteResult.costs?.material_cost?.toLocaleString()} تومان</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Electricity</span>
-                    <span>{quoteResult.costs?.electricity_cost?.toLocaleString()} IRT</span>
+                    <span>برق</span>
+                    <span>{quoteResult.costs?.electricity_cost?.toLocaleString()} تومان</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Labor</span>
-                    <span>{quoteResult.costs?.labor_cost?.toLocaleString()} IRT</span>
+                    <span>کارگر</span>
+                    <span>{quoteResult.costs?.labor_cost?.toLocaleString()} تومان</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Overhead</span>
-                    <span>{quoteResult.costs?.overhead?.toLocaleString()} IRT</span>
+                    <span>هزینه‌های سربار</span>
+                    <span>{quoteResult.costs?.overhead?.toLocaleString()} تومان</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Markup</span>
-                    <span>{quoteResult.costs?.markup?.toLocaleString()} IRT</span>
+                    <span>سود</span>
+                    <span>{quoteResult.costs?.markup?.toLocaleString()} تومان</span>
                   </div>
                 </div>
               </div>

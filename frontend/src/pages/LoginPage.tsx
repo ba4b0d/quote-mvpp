@@ -18,7 +18,7 @@ export default function LoginPage() {
     e.preventDefault()
     
     if (!username || !password) {
-      toast.error('Please enter username and password')
+      toast.error('لطفاً نام کاربری و رمز عبور را وارد کنید')
       return
     }
     
@@ -28,20 +28,20 @@ export default function LoginPage() {
       const success = await login(username, password)
       
       if (success) {
-        toast.success('Welcome back!')
+        toast.success('خوش آمدید!')
         navigate('/admin')
       } else {
-        toast.error('Invalid credentials')
+        toast.error('نام کاربری یا رمز عبور اشتباه است')
       }
     } catch (error) {
-      toast.error('Login failed')
+      toast.error('خطا در ورود')
     } finally {
       setIsLoading(false)
     }
   }
   
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center px-4" dir="rtl">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -50,46 +50,46 @@ export default function LoginPage() {
         <div className="card">
           <div className="text-center mb-8">
             <div className="text-6xl mb-4">🔐</div>
-            <h1 className="text-2xl font-bold">Staff Login</h1>
+            <h1 className="text-2xl font-bold">ورود کارکنان</h1>
             <p className="text-[var(--text-secondary)] mt-2">
-              Access the admin panel
+              دسترسی به پنل مدیریت
             </p>
           </div>
           
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm text-[var(--text-secondary)] mb-2">
-                Username
+                نام کاربری
               </label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-secondary)]" />
+                <User className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-secondary)]" />
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Enter username"
-                  className="input pl-10"
+                  placeholder="نام کاربری را وارد کنید"
+                  className="input pr-10"
                 />
               </div>
             </div>
             
             <div>
               <label className="block text-sm text-[var(--text-secondary)] mb-2">
-                Password
+                رمز عبور
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-secondary)]" />
+                <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-secondary)]" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter password"
-                  className="input pl-10 pr-10"
+                  placeholder="رمز عبور را وارد کنید"
+                  className="input pr-10 pl-10"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] hover:text-white"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] hover:text-white"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -104,17 +104,17 @@ export default function LoginPage() {
               {isLoading ? (
                 <>
                   <div className="spinner w-5 h-5 border-2" />
-                  Logging in...
+                  در حال ورود...
                 </>
               ) : (
-                'Login'
+                'ورود'
               )}
             </button>
           </form>
           
           {import.meta.env.DEV && (
             <div className="mt-6 pt-6 border-t border-[var(--surface-light)] text-center text-sm text-[var(--text-secondary)]">
-              <p>Default credentials: admin / admin123</p>
+              <p>اطلاعات ورود پیش‌فرض: admin / admin123</p>
             </div>
           )}
         </div>

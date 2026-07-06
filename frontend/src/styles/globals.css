@@ -162,7 +162,10 @@ a:hover {
   padding: 12px 16px;
   color: #fff;
   font-size: 14px;
+  font-family: 'Vazirmatn', system-ui, sans-serif;
   transition: all 0.2s ease;
+  direction: rtl;
+  text-align: right;
 }
 
 .input::placeholder {
@@ -197,13 +200,19 @@ a:hover {
   padding: 12px 40px 12px 16px;
   color: #fff;
   font-size: 14px;
+  font-family: 'Vazirmatn', system-ui, sans-serif;
   appearance: none;
   cursor: pointer;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23a0a0a0'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 12px center;
+  background-position: left 12px center;
   background-size: 20px;
   transition: all 0.2s ease;
+}
+
+[dir="rtl"] .select {
+  padding: 12px 16px 12px 40px;
+  background-position: left 12px center;
 }
 
 .select:focus {

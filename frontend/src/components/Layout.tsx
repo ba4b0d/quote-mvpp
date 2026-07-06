@@ -18,12 +18,12 @@ export default function Layout({ admin = false }: { admin?: boolean }) {
   }
   
   const navItems = [
-    { path: '/', label: 'Home', icon: Home },
-    { path: '/quote', label: 'Quote', icon: Calculator },
+    { path: '/', label: 'خانه', icon: Home },
+    { path: '/quote', label: 'قیمت‌دهی', icon: Calculator },
   ]
   
   return (
-    <div className="min-h-screen bg-[var(--background)]">
+    <div className="min-h-screen bg-[var(--background)]" dir="rtl">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-[var(--surface)]/80 backdrop-blur-lg border-b border-[var(--surface-light)]">
         <div className="container mx-auto px-4">
@@ -94,7 +94,7 @@ export default function Layout({ admin = false }: { admin?: boolean }) {
       {/* Footer */}
       <footer className="bg-[var(--surface)] border-t border-[var(--surface-light)] py-8 mt-20">
         <div className="container mx-auto px-4 text-center text-[var(--text-secondary)] text-sm">
-          <p>© 2026 3DJAT Quote. Built with ❤️</p>
+          <p>© ۲۰۲۶ 3DJAT Quote. ساخته شده با ❤️</p>
         </div>
       </footer>
     </div>

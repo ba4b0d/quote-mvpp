@@ -30,7 +30,7 @@ export default function AdminPage() {
       setSettings(settingsRes.data)
       setEditSettings(settingsRes.data)
     } catch (error) {
-      toast.error('Error loading data')
+      toast.error('خطا در بارگذاری اطلاعات')
     } finally {
       setIsLoading(false)
     }
@@ -57,27 +57,27 @@ export default function AdminPage() {
         )
       )
       setSettings(editSettings)
-      toast.success('Settings saved!')
+      toast.success('تنظیمات ذخیره شد!')
     } catch (error) {
-      toast.error('Error saving settings')
+      toast.error('خطا در ذخیره تنظیمات')
     }
   }
   
   const tabs = [
-    { id: 'materials', label: 'Materials', icon: Package },
-    { id: 'settings', label: 'Settings', icon: Settings },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+    { id: 'materials', label: 'متریال‌ها', icon: Package },
+    { id: 'settings', label: 'تنظیمات', icon: Settings },
+    { id: 'analytics', label: 'آمار', icon: BarChart3 },
   ]
   
   return (
-    <div className="min-h-screen bg-[var(--background)]">
+    <div className="min-h-screen bg-[var(--background)]" dir="rtl">
       {/* Admin Header */}
       <header className="bg-[var(--surface)] border-b border-[var(--surface-light)] px-6 py-4">
         <div className="container mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <h1 className="text-xl font-bold">Admin Panel</h1>
+            <h1 className="text-xl font-bold">پنل مدیریت</h1>
             <span className="text-sm text-[var(--text-secondary)]">
-              Welcome, {user?.username}
+              خوش آمدید، {user?.username}
             </span>
           </div>
           
@@ -86,7 +86,7 @@ export default function AdminPage() {
             className="btn-ghost flex items-center gap-2"
           >
             <LogOut className="w-4 h-4" />
-            Logout
+            خروج
           </button>
         </div>
       </header>
@@ -121,9 +121,9 @@ export default function AdminPage() {
                 className="card"
               >
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold">Materials</h2>
+                  <h2 className="text-xl font-bold">متریال‌ها</h2>
                   <button className="btn-secondary text-sm">
-                    + Add Material
+                    + افزودن متریال
                   </button>
                 </div>
                 
@@ -136,11 +136,11 @@ export default function AdminPage() {
                     <table className="w-full">
                       <thead>
                         <tr className="text-right text-[var(--text-secondary)] text-sm border-b border-[var(--surface-light)]">
-                          <th className="pb-3 font-normal">Name</th>
-                          <th className="pb-3 font-normal">Price/kg</th>
-                          <th className="pb-3 font-normal">Density</th>
-                          <th className="pb-3 font-normal">Color</th>
-                          <th className="pb-3 font-normal">Status</th>
+                          <th className="pb-3 font-normal">نام</th>
+                          <th className="pb-3 font-normal">قیمت/کیلوگرم</th>
+                          <th className="pb-3 font-normal">چگالی</th>
+                          <th className="pb-3 font-normal">رنگ</th>
+                          <th className="pb-3 font-normal">وضعیت</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -150,12 +150,12 @@ export default function AdminPage() {
                             className="border-b border-[var(--surface-light)] hover:bg-[var(--surface-light)]/50"
                           >
                             <td className="py-3">{mat.name}</td>
-                            <td className="py-3">{mat.price_per_kg?.toLocaleString()} IRT</td>
+                            <td className="py-3">{mat.price_per_kg?.toLocaleString()} تومان</td>
                             <td className="py-3">{mat.density_g_cm3}g/cm³</td>
                             <td className="py-3">{mat.color}</td>
                             <td className="py-3">
                               <span className="px-2 py-1 bg-[var(--primary)]/20 text-[var(--primary)] text-xs rounded">
-                                Active
+                                فعال
                               </span>
                             </td>
                           </tr>
@@ -174,13 +174,13 @@ export default function AdminPage() {
                 className="card"
               >
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold">Settings</h2>
+                  <h2 className="text-xl font-bold">تنظیمات</h2>
                   <button
                     onClick={handleSaveSettings}
                     className="btn-primary flex items-center gap-2"
                   >
                     <Save className="w-4 h-4" />
-                    Save Changes
+                    ذخیره تغییرات
                   </button>
                 </div>
                 
@@ -188,7 +188,7 @@ export default function AdminPage() {
                   <div className="grid grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm text-[var(--text-secondary)] mb-2">
-                        Electricity Rate (IRT/kWh)
+                        نرخ برق (تومان/کیلووات‌ساعت)
                       </label>
                       <input
                         type="number"
@@ -200,7 +200,7 @@ export default function AdminPage() {
                     
                     <div>
                       <label className="block text-sm text-[var(--text-secondary)] mb-2">
-                        Overhead (%)
+                        هزینه سربار (%)
                       </label>
                       <input
                         type="number"
@@ -213,7 +213,7 @@ export default function AdminPage() {
                     
                     <div>
                       <label className="block text-sm text-[var(--text-secondary)] mb-2">
-                        Markup (%)
+                        سود (%)
                       </label>
                       <input
                         type="number"
@@ -226,7 +226,7 @@ export default function AdminPage() {
                     
                     <div>
                       <label className="block text-sm text-[var(--text-secondary)] mb-2">
-                        Labor Cost (IRT/hour)
+                        هزینه کارگر (تومان/ساعت)
                       </label>
                       <input
                         type="number"
@@ -238,7 +238,7 @@ export default function AdminPage() {
                     
                     <div>
                       <label className="block text-sm text-[var(--text-secondary)] mb-2">
-                        Default Layer Height (mm)
+                        ارتفاع لایه پیش‌فرض (mm)
                       </label>
                       <input
                         type="number"
@@ -251,7 +251,7 @@ export default function AdminPage() {
                     
                     <div>
                       <label className="block text-sm text-[var(--text-secondary)] mb-2">
-                        Default Infill (%)
+                        درصد پر شدن پیش‌فرض (%)
                       </label>
                       <input
                         type="number"
@@ -272,25 +272,25 @@ export default function AdminPage() {
                 animate={{ opacity: 1, y: 0 }}
                 className="card"
               >
-                <h2 className="text-xl font-bold mb-6">Analytics</h2>
+                <h2 className="text-xl font-bold mb-6">آمار</h2>
                 
                 <div className="grid grid-cols-3 gap-4 mb-8">
                   <div className="bg-[var(--surface-light)] rounded-lg p-6 text-center">
-                    <p className="text-3xl font-bold gradient-text">0</p>
-                    <p className="text-[var(--text-secondary)] text-sm">Total Quotes</p>
+                    <p className="text-3xl font-bold gradient-text">۰</p>
+                    <p className="text-[var(--text-secondary)] text-sm">کل قیمت‌ها</p>
                   </div>
                   <div className="bg-[var(--surface-light)] rounded-lg p-6 text-center">
-                    <p className="text-3xl font-bold gradient-text">0 IRT</p>
-                    <p className="text-[var(--text-secondary)] text-sm">Total Revenue</p>
+                    <p className="text-3xl font-bold gradient-text">۰ تومان</p>
+                    <p className="text-[var(--text-secondary)] text-sm">کل درآمد</p>
                   </div>
                   <div className="bg-[var(--surface-light)] rounded-lg p-6 text-center">
-                    <p className="text-3xl font-bold gradient-text">0</p>
-                    <p className="text-[var(--text-secondary)] text-sm">This Month</p>
+                    <p className="text-3xl font-bold gradient-text">۰</p>
+                    <p className="text-[var(--text-secondary)] text-sm">این ماه</p>
                   </div>
                 </div>
                 
                 <p className="text-[var(--text-secondary)] text-center py-12">
-                  Analytics dashboard coming soon...
+                  داشبورد آمار به زودی...
                 </p>
               </motion.div>
             )}

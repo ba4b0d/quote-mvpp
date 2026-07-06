@@ -1,28 +1,28 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { Calculator, Box, Zap, Shield, ArrowRight } from 'lucide-react'
+import { Calculator, Box, Zap, Shield, ArrowLeft } from 'lucide-react'
 
 export default function HomePage() {
   const features = [
     {
       icon: Calculator,
-      title: 'Instant Quotes',
-      description: 'Upload your STL file and get an instant price estimate with detailed breakdown.'
+      title: 'قیمت‌دهی آنی',
+      description: 'فایل STL خود را آپلود کنید و فوراً برآورد قیمت با جزئیات کامل دریافت کنید.'
     },
     {
       icon: Box,
-      title: '3D Preview',
-      description: 'Visualize your model in 3D before printing. See dimensions and complexity.'
+      title: 'پیش‌نمایش سه‌بعدی',
+      description: 'مدل خود را قبل از چاپ به صورت سه‌بعدی مشاهده کنید. ابعاد و پیچیدگی را ببینید.'
     },
     {
       icon: Zap,
-      title: 'Fast Processing',
-      description: 'Powered by trimesh for lightning-fast mesh analysis and calculations.'
+      title: 'پردازش سریع',
+      description: 'با قدرت trimesh تحلیل مش و محاسبات با سرعت بالا انجام می‌شود.'
     },
     {
       icon: Shield,
-      title: 'Secure & Private',
-      description: 'Your files and data are processed securely. No external servers involved.'
+      title: 'امن و خصوصی',
+      description: 'فایل‌ها و داده‌های شما به صورت امن پردازش می‌شوند. بدون سرور خارجی.'
     }
   ]
   
@@ -38,19 +38,19 @@ export default function HomePage() {
           <span className="gradient-text">3DJAT Quote</span>
           <br />
           <span className="text-3xl text-[var(--text-secondary)]">
-            Modern 3D Printing Calculator
+            محاسبه‌گر مدرن چاپ سه‌بعدی
           </span>
         </h1>
         
         <p className="text-xl text-[var(--text-secondary)] max-w-2xl mx-auto mb-10">
-          Upload your 3D files, select your material, and get instant accurate quotes.
-          Powered by advanced mesh analysis technology.
+          فایل‌های سه‌بعدی خود را آپلود کنید، متریال را انتخاب کنید و فوراً قیمت دقیق دریافت کنید.
+          با فناوری پیشرفته تحلیل مش.
         </p>
         
         <Link to="/quote" className="btn-primary inline-flex items-center gap-2">
           <Calculator className="w-5 h-5" />
-          Get a Quote
-          <ArrowRight className="w-5 h-5" />
+          دریافت قیمت
+          <ArrowLeft className="w-5 h-5" />
         </Link>
       </motion.div>
       
@@ -77,13 +77,13 @@ export default function HomePage() {
       
       {/* How It Works */}
       <div className="container mx-auto px-4 py-16">
-        <h2 className="text-3xl font-bold text-center mb-12">How It Works</h2>
+        <h2 className="text-3xl font-bold text-center mb-12">چگونه کار می‌کند؟</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
           {[
-            { step: '1', title: 'Upload File', desc: 'Drag & drop your STL, 3MF, or OBJ file' },
-            { step: '2', title: 'Select Options', desc: 'Choose material, layer height, and infill' },
-            { step: '3', title: 'Get Quote', desc: 'Receive instant price with full breakdown' }
+            { step: '۱', title: 'آپلود فایل', desc: 'فایل STL، 3MF یا OBJ خود را بکشید و رها کنید' },
+            { step: '۲', title: 'انتخاب گزینه‌ها', desc: 'متریال، ارتفاع لایه و درصد پر شدن را انتخاب کنید' },
+            { step: '۳', title: 'دریافت قیمت', desc: 'قیمت فوری با جزئیات کامل هزینه دریافت کنید' }
           ].map((item, index) => (
             <motion.div
               key={item.step}
@@ -104,7 +104,7 @@ export default function HomePage() {
       
       {/* Footer */}
       <footer className="container mx-auto px-4 py-8 text-center text-[var(--text-secondary)] text-sm">
-        <p>Built with ❤️ for 3D printing enthusiasts</p>
+        <p>ساخته شده با ❤️ برای علاقه‌مندان چاپ سه‌بعدی</p>
         <p className="mt-2">3DJAT Quote v2.0</p>
       </footer>
     </div>
