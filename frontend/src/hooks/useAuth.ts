@@ -52,21 +52,26 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({
       token: null,
       isAuthenticated: false,
-      user: null
+      user: null,
+      isLoading: false
     })
   },
   
   checkAuth: async () => {
-    const token = localStorage.getItem('staff_token')
+    // Skip if already authenticated and we have a token
+    const { isAuthenticated, token } = get()
+    if (isAuthenticated && token) return
     
-    if (!token) {
+    const storedToken = localStorage.getItem('staff_token')
+    
+    if (!storedToken) {
       set({ isAuthenticated: false, isLoading: false, user: null })
       return
     }
     
     try {
       const response = await axios.post(`${API_URL}/auth/verify`, null, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${storedToken}` }
       })
       
       if (response.data.valid) {
@@ -76,7 +81,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           user: {
             username: response.data.username,
             role: response.data.role
-          }
+          },
+          token: storedToken
         })
       } else {
         localStorage.removeItem('staff_token')
