@@ -14,7 +14,7 @@ RUN npm ci
 
 # Copy frontend source
 COPY frontend/ ./src/
-COPY frontend/vite.config.ts ./
+COPY frontend/vite.config.js ./
 COPY frontend/index.html ./
 
 # Build for production

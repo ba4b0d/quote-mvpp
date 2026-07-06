@@ -1,9 +1,8 @@
 """SQLite database for quote-mvpp v2."""
 
 from sqlalchemy import create_engine, Column, Integer, String, Float, Boolean, DateTime, Text
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
-from datetime import datetime
+from sqlalchemy.orm import sessionmaker, Session, DeclarativeBase
+from datetime import datetime, timezone
 from typing import Generator, Optional
 import os
 
@@ -19,7 +18,8 @@ engine = create_engine(
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-Base = declarative_base()
+class Base(DeclarativeBase):
+    pass
 
 
 class Material(Base):
@@ -36,8 +36,8 @@ class Material(Base):
     is_public = Column(Boolean, default=False)
     is_active = Column(Boolean, default=True)
     title_fa = Column(String)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 
 class Quote(Base):
@@ -53,7 +53,7 @@ class Quote(Base):
     file_name = Column(String)
     file_size = Column(String)
     options = Column(Text)  # JSON string
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class Settings(Base):
@@ -64,7 +64,7 @@ class Settings(Base):
     key = Column(String, unique=True, nullable=False)
     value = Column(Text, nullable=False)  # JSON value
     description = Column(Text)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 
 class StaffUser(Base):
@@ -76,7 +76,7 @@ class StaffUser(Base):
     password_hash = Column(String, nullable=False)
     role = Column(String, default="staff")  # admin, staff
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     last_login = Column(DateTime)
 
 

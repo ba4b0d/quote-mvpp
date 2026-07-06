@@ -78,7 +78,7 @@ class EstimationService:
         material_cost = calculate_material_cost(
             grams=metrics.estimated_grams,
             price_per_kg=material_price,
-            waste_pct=self.analyzer.waste_pct
+            waste_pct=0  # Already included in estimated_grams
         )
         
         electricity_cost = calculate_electricity_cost(

@@ -13,7 +13,7 @@ interface QuoteState {
   isLoadingMaterials: boolean
   
   // Actions
-  quote: (
+  fetchQuote: (
     file: File | null,
     materialId: string,
     layerHeight: number,
@@ -34,7 +34,7 @@ export const useQuoteStore = create<QuoteState>((set, get) => ({
   materials: [],
   isLoadingMaterials: false,
   
-  quote: async (file, materialId, layerHeight, infill, manual) => {
+  fetchQuote: async (file, materialId, layerHeight, infill, manual) => {
     set({ isLoading: true, error: null, quote: null })
     
     try {

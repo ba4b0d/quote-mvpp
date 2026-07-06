@@ -14,7 +14,7 @@ describe('QuotePage Component', () => {
     quote: null,
     isLoading: false,
     error: null,
-    quote: vi.fn(),
+    fetchQuote: vi.fn(),
   }
 
   beforeEach(() => {

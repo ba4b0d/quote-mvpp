@@ -1,6 +1,7 @@
 from pydantic_settings import BaseSettings
 from typing import List
 from functools import lru_cache
+import secrets
 
 
 class Settings(BaseSettings):
@@ -15,7 +16,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite:///./data/quote.db"
     
     # JWT
-    SECRET_KEY: str = "your-secret-key-change-in-production"
+    SECRET_KEY: str = secrets.token_urlsafe(32)
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
     

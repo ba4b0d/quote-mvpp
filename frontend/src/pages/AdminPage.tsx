@@ -12,6 +12,7 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState('materials')
   const [materials, setMaterials] = useState<any[]>([])
   const [settings, setSettings] = useState<any>({})
+  const [editSettings, setEditSettings] = useState<any>({})
   const [isLoading, setIsLoading] = useState(true)
   
   useEffect(() => {
@@ -27,6 +28,7 @@ export default function AdminPage() {
       ])
       setMaterials(materialsRes.data)
       setSettings(settingsRes.data)
+      setEditSettings(settingsRes.data)
     } catch (error) {
       toast.error('Error loading data')
     } finally {
@@ -34,9 +36,27 @@ export default function AdminPage() {
     }
   }
   
+  const updateEditSetting = (key: string, value: string) => {
+    setEditSettings((prev: any) => ({ ...prev, [key]: value }))
+  }
+  
   const handleSaveSettings = async () => {
     try {
-      // Save settings logic here
+      const settingsToSave = {
+        electricity_rate_per_kwh: editSettings.electricity_rate_per_kwh,
+        overhead_pct: editSettings.overhead_pct,
+        markup_pct: editSettings.markup_pct,
+        coloring_cost_per_hour: editSettings.coloring_cost_per_hour,
+        default_layer_height: editSettings.default_layer_height,
+        default_infill_pct: editSettings.default_infill_pct,
+      }
+      
+      await Promise.all(
+        Object.entries(settingsToSave).map(([key, value]) =>
+          axios.put(`${API_URL}/settings/${key}`, { value: String(value) })
+        )
+      )
+      setSettings(editSettings)
       toast.success('Settings saved!')
     } catch (error) {
       toast.error('Error saving settings')
@@ -172,7 +192,8 @@ export default function AdminPage() {
                       </label>
                       <input
                         type="number"
-                        defaultValue={settings.electricity_rate_per_kwh}
+                        value={editSettings.electricity_rate_per_kwh || ''}
+                        onChange={(e) => updateEditSetting('electricity_rate_per_kwh', e.target.value)}
                         className="input"
                       />
                     </div>
@@ -184,7 +205,8 @@ export default function AdminPage() {
                       <input
                         type="number"
                         step="0.01"
-                        defaultValue={settings.overhead_pct}
+                        value={editSettings.overhead_pct || ''}
+                        onChange={(e) => updateEditSetting('overhead_pct', e.target.value)}
                         className="input"
                       />
                     </div>
@@ -196,7 +218,8 @@ export default function AdminPage() {
                       <input
                         type="number"
                         step="0.01"
-                        defaultValue={settings.markup_pct}
+                        value={editSettings.markup_pct || ''}
+                        onChange={(e) => updateEditSetting('markup_pct', e.target.value)}
                         className="input"
                       />
                     </div>
@@ -207,7 +230,8 @@ export default function AdminPage() {
                       </label>
                       <input
                         type="number"
-                        defaultValue={settings.coloring_cost_per_hour}
+                        value={editSettings.coloring_cost_per_hour || ''}
+                        onChange={(e) => updateEditSetting('coloring_cost_per_hour', e.target.value)}
                         className="input"
                       />
                     </div>
@@ -219,7 +243,8 @@ export default function AdminPage() {
                       <input
                         type="number"
                         step="0.01"
-                        defaultValue={settings.default_layer_height}
+                        value={editSettings.default_layer_height || ''}
+                        onChange={(e) => updateEditSetting('default_layer_height', e.target.value)}
                         className="input"
                       />
                     </div>
@@ -231,7 +256,8 @@ export default function AdminPage() {
                       <input
                         type="number"
                         step="0.01"
-                        defaultValue={settings.default_infill_pct}
+                        value={editSettings.default_infill_pct || ''}
+                        onChange={(e) => updateEditSetting('default_infill_pct', e.target.value)}
                         className="input"
                       />
                     </div>

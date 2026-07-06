@@ -1,6 +1,7 @@
 """Materials API endpoints."""
 
 from fastapi import APIRouter, HTTPException, Depends
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from typing import List, Dict, Any
 
@@ -74,4 +75,27 @@ async def get_setting(key: str, db: Session = Depends(get_db)) -> Dict[str, Any]
     if not setting:
         raise HTTPException(status_code=404, detail=f"Setting '{key}' not found")
     
+    return {"key": key, "value": setting.value}
+
+
+class SettingUpdate(BaseModel):
+    value: str
+
+@router.put("/settings/{key}")
+async def update_setting(key: str, update: SettingUpdate, db: Session = Depends(get_db)):
+    """
+    Update a specific setting.
+    
+    Args:
+        key: Setting key
+        update: New value
+        
+    Returns:
+        Updated setting
+    """
+    setting = db.query(Settings).filter(Settings.key == key).first()
+    if not setting:
+        raise HTTPException(status_code=404, detail=f"Setting '{key}' not found")
+    setting.value = update.value
+    db.commit()
     return {"key": key, "value": setting.value}

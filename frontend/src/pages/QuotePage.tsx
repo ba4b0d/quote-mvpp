@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Upload, FileText, Settings, Calculator, DollarSign, Clock, Package } from 'lucide-react'
 import ModelViewer, { ModelMetrics } from '../components/ModelViewer'
@@ -14,7 +14,11 @@ export default function QuotePage() {
   const [manualGrams, setManualGrams] = useState('')
   const [manualMinutes, setManualMinutes] = useState('')
   
-  const { quote: quoteResult, isLoading, quote: fetchQuote } = useQuoteStore()
+  const { quote: quoteResult, isLoading, fetchQuote, fetchMaterials, materials } = useQuoteStore()
+  
+  useEffect(() => {
+    fetchMaterials()
+  }, [fetchMaterials])
   
   const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -131,15 +135,15 @@ export default function QuotePage() {
                   onChange={(e) => setMaterialId(e.target.value)}
                   className="select"
                 >
-                  <option value="pla_black">PLA Black - 1,650,000 IRT/kg</option>
-                  <option value="pla_orange">PLA Orange - 1,650,000 IRT/kg</option>
-                  <option value="pla_gray">PLA Gray - 1,650,000 IRT/kg</option>
-                  <option value="pla_red">PLA Red - 1,650,000 IRT/kg</option>
-                  <option value="pla_white">PLA White - 1,650,000 IRT/kg</option>
-                  <option value="pla_silk">PLA Silk - 1,750,000 IRT/kg</option>
-                  <option value="petg">PETG - 1,750,000 IRT/kg</option>
-                  <option value="tpu">TPU (95A) - 2,480,000 IRT/kg</option>
-                  <option value="wood">WOOD - 1,750,000 IRT/kg</option>
+                  {materials.length > 0 ? (
+                    materials.map((mat: any) => (
+                      <option key={mat.id || mat.material_id} value={mat.id || mat.material_id}>
+                        {mat.name} - {mat.price_per_kg?.toLocaleString()} IRT/kg
+                      </option>
+                    ))
+                  ) : (
+                    <option value="" disabled>Loading materials...</option>
+                  )}
                 </select>
               </div>
               

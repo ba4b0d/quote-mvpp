@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback, Suspense } from 'react'
+import { useRef, useState, useCallback, useMemo, Suspense } from 'react'
 import { Canvas, useLoader } from '@react-three/fiber'
 import { OrbitControls, Stage, useProgress, Html, Center } from '@react-three/drei'
 import * as THREE from 'three'
@@ -152,17 +152,15 @@ function Loader() {
 function ModelLoader({ url }: { url: string }) {
   // Note: In production, you'd use trimesh to load the actual file
   // For now, we'll show a placeholder geometry
-  const geometry = new THREE.BoxGeometry(2, 2, 2)
-  const material = new THREE.MeshStandardMaterial({
+  const geometry = useMemo(() => new THREE.BoxGeometry(2, 2, 2), [])
+  const material = useMemo(() => new THREE.MeshStandardMaterial({
     color: 0x00d4aa,
     metalness: 0.3,
     roughness: 0.4,
-  })
-  
+  }), [])
+
   return (
-    <mesh geometry={geometry} material={material}>
-      <OrbitControls makeDefault autoRotate autoRotateSpeed={0.5} />
-    </mesh>
+    <mesh geometry={geometry} material={material} />
   )
 }
 

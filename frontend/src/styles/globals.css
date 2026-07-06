@@ -1,5 +1,9 @@
 /* Global styles for quote-mvpp v2 */
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   --primary: #00d4aa;
   --primary-dark: #00b894;

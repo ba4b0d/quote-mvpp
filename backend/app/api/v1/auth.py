@@ -1,6 +1,6 @@
 """Auth API endpoints."""
 
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, status, Header
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from datetime import timedelta
@@ -28,7 +28,7 @@ class TokenData(BaseModel):
     role: str = None
 
 
-@router.post("/auth/login", response_model=LoginResponse)
+@router.post("/login", response_model=LoginResponse)
 async def login(request: LoginRequest, db: Session = Depends(get_db)):
     """
     Authenticate staff user and return JWT token.
@@ -63,18 +63,20 @@ async def login(request: LoginRequest, db: Session = Depends(get_db)):
     }
 
 
-@router.post("/auth/verify")
-async def verify_token(token: str, db: Session = Depends(get_db)):
+@router.post("/verify")
+async def verify_token(authorization: str = Header(...), db: Session = Depends(get_db)):
     """
     Verify a JWT token.
     
     Args:
-        token: JWT token to verify
+        authorization: Authorization header with Bearer token
         
     Returns:
         Token validity and user info
     """
     from app.core.security import decode_token
+    
+    token = authorization.replace("Bearer ", "") if authorization.startswith("Bearer ") else authorization
     
     payload = decode_token(token)
     

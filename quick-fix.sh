@@ -49,7 +49,7 @@ sudo nginx -t && sudo systemctl reload nginx
 pkill -f uvicorn || true
 sleep 2
 cd /opt/quote-mvpp/backend
-nohup /home/raya/.local/bin/uvicorn app.main:app --host 0.0.0.0 --port 8001 > /tmp/backend.log 2>&1 &
+nohup uvicorn app.main:app --host 0.0.0.0 --port 8001 > /tmp/backend.log 2>&1 &
 
 sleep 3
 

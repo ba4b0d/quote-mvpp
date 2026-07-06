@@ -29,6 +29,11 @@ async def lifespan(app: FastAPI):
     logger.info(f"Starting {settings.APP_NAME} v{settings.APP_VERSION}")
     logger.info("Backend v2 - Modern architecture")
     
+    # Warn if SECRET_KEY is not set via environment
+    import os
+    if not os.environ.get("SECRET_KEY"):
+        logger.warning("SECRET_KEY not set via environment variable - using auto-generated key. Tokens will be invalidated on restart!")
+    
     # Initialize database
     init_db()
     logger.info("Database initialized")

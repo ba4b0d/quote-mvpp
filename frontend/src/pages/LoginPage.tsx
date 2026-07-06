@@ -112,9 +112,11 @@ export default function LoginPage() {
             </button>
           </form>
           
-          <div className="mt-6 pt-6 border-t border-[var(--surface-light)] text-center text-sm text-[var(--text-secondary)]">
-            <p>Default credentials: admin / admin123</p>
-          </div>
+          {import.meta.env.DEV && (
+            <div className="mt-6 pt-6 border-t border-[var(--surface-light)] text-center text-sm text-[var(--text-secondary)]">
+              <p>Default credentials: admin / admin123</p>
+            </div>
+          )}
         </div>
       </motion.div>
     </div>
