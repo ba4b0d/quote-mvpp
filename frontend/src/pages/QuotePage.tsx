@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
-import { motion } from 'framer-motion'
 import { Upload, FileText, Settings, Calculator, DollarSign, Clock, Package } from 'lucide-react'
-import ModelViewer, { ModelMetrics } from '../components/ModelViewer'
+import ModelViewer from '../components/ModelViewer'
 import { useQuoteStore } from '../hooks/useQuoteStore'
 import toast from 'react-hot-toast'
 
@@ -63,14 +62,16 @@ export default function QuotePage() {
     }
   }
   
+  // Get display values from quote result
+  const totalCost = quoteResult?.formatted?.total || (quoteResult?.costs?.total ? `${quoteResult.costs.total.toLocaleString()} تومان` : null)
+  const printHours = quoteResult?.print_time?.hours ?? 0
+  const printMinutes = quoteResult?.print_time?.minutes ?? 0
+  const materialGrams = quoteResult?.mesh_metrics?.material_grams ?? quoteResult?.input?.material_grams ?? quoteResult?.input?.grams ?? 0
+  
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="container mx-auto px-4 py-8"
-    >
+    <div className="container mx-auto px-4 py-8" dir="rtl">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Right: File Upload & 3D Preview (RTL — right side first) */}
+        {/* Right side: File Upload & 3D Preview */}
         <div className="space-y-6">
           <div className="card">
             <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
@@ -81,7 +82,7 @@ export default function QuotePage() {
             <div
               onDrop={handleDrop}
               onDragOver={(e) => e.preventDefault()}
-              className="border-2 border-dashed border-[var(--surface-light)] 
+              className="border-2 border-dashed border-[var(--border)] 
                          rounded-xl p-8 text-center cursor-pointer
                          hover:border-[var(--primary)] transition-colors"
             >
@@ -116,7 +117,7 @@ export default function QuotePage() {
           </div>
         </div>
         
-        {/* Left: Options & Quote (RTL — left side second) */}
+        {/* Left side: Options & Quote */}
         <div className="space-y-6">
           {/* Material Selection */}
           <div className="card">
@@ -127,9 +128,7 @@ export default function QuotePage() {
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm text-[var(--text-secondary)] mb-2">
-                  متریال
-                </label>
+                <label className="block text-sm text-[var(--text-secondary)] mb-2">متریال</label>
                 <select
                   value={materialId}
                   onChange={(e) => setMaterialId(e.target.value)}
@@ -137,12 +136,12 @@ export default function QuotePage() {
                 >
                   {materials.length > 0 ? (
                     materials.map((mat: any) => (
-                      <option key={mat.id || mat.material_id} value={mat.id || mat.material_id}>
+                      <option key={mat.id} value={mat.id}>
                         {mat.name} - {mat.price_per_kg?.toLocaleString()} تومان/کیلوگرم
                       </option>
                     ))
                   ) : (
-                    <option value="" disabled>در حال بارگذاری متریال‌ها...</option>
+                    <option value="" disabled>در حال بارگذاری...</option>
                   )}
                 </select>
               </div>
@@ -151,52 +150,26 @@ export default function QuotePage() {
                 <label className="block text-sm text-[var(--text-secondary)] mb-2">
                   ارتفاع لایه: {layerHeight}mm
                 </label>
-                <input
-                  type="range"
-                  min="0.1"
-                  max="0.3"
-                  step="0.02"
-                  value={layerHeight}
-                  onChange={(e) => setLayerHeight(parseFloat(e.target.value))}
-                  className="slider"
-                />
+                <input type="range" min="0.1" max="0.3" step="0.02" value={layerHeight}
+                  onChange={(e) => setLayerHeight(parseFloat(e.target.value))} className="slider" />
               </div>
               
               <div>
                 <label className="block text-sm text-[var(--text-secondary)] mb-2">
                   درصد پر شدن: {(infill * 100).toFixed(0)}%
                 </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.05"
-                  value={infill}
-                  onChange={(e) => setInfill(parseFloat(e.target.value))}
-                  className="slider"
-                />
+                <input type="range" min="0" max="1" step="0.05" value={infill}
+                  onChange={(e) => setInfill(parseFloat(e.target.value))} className="slider" />
               </div>
               
-              {/* Manual Input Toggle */}
+              {/* Mode Toggle */}
               <div className="flex gap-2">
-                <button
-                  onClick={() => setMode('file')}
-                  className={`flex-1 py-2 px-4 rounded-lg transition-colors ${
-                    mode === 'file' 
-                      ? 'bg-[var(--primary)] text-black' 
-                      : 'bg-[var(--surface-light)]'
-                  }`}
-                >
+                <button onClick={() => setMode('file')}
+                  className={`flex-1 py-2 px-4 rounded-lg transition-colors ${mode === 'file' ? 'bg-[var(--primary)] text-white' : 'bg-[var(--surface-light)]'}`}>
                   حالت فایل
                 </button>
-                <button
-                  onClick={() => setMode('manual')}
-                  className={`flex-1 py-2 px-4 rounded-lg transition-colors ${
-                    mode === 'manual' 
-                      ? 'bg-[var(--primary)] text-black' 
-                      : 'bg-[var(--surface-light)]'
-                  }`}
-                >
+                <button onClick={() => setMode('manual')}
+                  className={`flex-1 py-2 px-4 rounded-lg transition-colors ${mode === 'manual' ? 'bg-[var(--primary)] text-white' : 'bg-[var(--surface-light)]'}`}>
                   ورودی دستی
                 </button>
               </div>
@@ -204,28 +177,14 @@ export default function QuotePage() {
               {mode === 'manual' && (
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm text-[var(--text-secondary)] mb-2">
-                      گرم
-                    </label>
-                    <input
-                      type="number"
-                      value={manualGrams}
-                      onChange={(e) => setManualGrams(e.target.value)}
-                      placeholder="مثلاً ۱۵۰"
-                      className="input"
-                    />
+                    <label className="block text-sm text-[var(--text-secondary)] mb-2">گرم</label>
+                    <input type="number" value={manualGrams} onChange={(e) => setManualGrams(e.target.value)}
+                      placeholder="مثلاً ۱۵۰" className="input" />
                   </div>
                   <div>
-                    <label className="block text-sm text-[var(--text-secondary)] mb-2">
-                      دقیقه
-                    </label>
-                    <input
-                      type="number"
-                      value={manualMinutes}
-                      onChange={(e) => setManualMinutes(e.target.value)}
-                      placeholder="مثلاً ۱۸۰"
-                      className="input"
-                    />
+                    <label className="block text-sm text-[var(--text-secondary)] mb-2">دقیقه</label>
+                    <input type="number" value={manualMinutes} onChange={(e) => setManualMinutes(e.target.value)}
+                      placeholder="مثلاً ۱۸۰" className="input" />
                   </div>
                 </div>
               )}
@@ -242,13 +201,9 @@ export default function QuotePage() {
             {isLoading ? 'در حال محاسبه...' : 'محاسبه قیمت'}
           </button>
           
-          {/* Quote Result */}
-          {quoteResult && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="card"
-            >
+          {/* Quote Result — always visible when data exists */}
+          {quoteResult && quoteResult.costs && (
+            <div className="card" style={{ animation: 'fadeIn 0.3s ease-out' }}>
               <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
                 <DollarSign className="w-5 h-5 text-[var(--primary)]" />
                 نتیجه قیمت
@@ -256,9 +211,7 @@ export default function QuotePage() {
               
               <div className="text-center mb-6">
                 <p className="text-[var(--text-secondary)] text-sm">هزینه کل</p>
-                <p className="text-4xl font-bold gradient-text">
-                  {quoteResult.formatted?.total || `${quoteResult.costs?.total?.toLocaleString()} تومان`}
-                </p>
+                <p className="text-4xl font-bold gradient-text">{totalCost}</p>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
@@ -267,9 +220,7 @@ export default function QuotePage() {
                     <Clock className="w-4 h-4" />
                     زمان چاپ
                   </div>
-                  <p className="text-lg font-bold">
-                    {quoteResult.print_time?.hours || 0} ساعت {quoteResult.print_time?.minutes || 0} دقیقه
-                  </p>
+                  <p className="text-lg font-bold">{printHours} ساعت {printMinutes} دقیقه</p>
                 </div>
                 
                 <div className="bg-[var(--surface-light)] rounded-lg p-4">
@@ -277,17 +228,13 @@ export default function QuotePage() {
                     <Package className="w-4 h-4" />
                     متریال
                   </div>
-                  <p className="text-lg font-bold">
-                    {quoteResult.mesh_metrics?.material_grams?.toFixed(0) || quoteResult.input?.material_grams?.toFixed(0)} گرم
-                  </p>
+                  <p className="text-lg font-bold">{materialGrams} گرم</p>
                 </div>
               </div>
               
               {/* Cost Breakdown */}
-              <div className="mt-4 pt-4 border-t border-[var(--surface-light)]">
-                <h3 className="text-sm font-medium text-[var(--text-secondary)] mb-2">
-                  جزئیات هزینه
-                </h3>
+              <div className="mt-4 pt-4 border-t border-[var(--border)]">
+                <h3 className="text-sm font-medium text-[var(--text-secondary)] mb-2">جزئیات هزینه</h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span>متریال</span>
@@ -311,10 +258,20 @@ export default function QuotePage() {
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
+          )}
+          
+          {/* Debug: show raw result if exists but costs missing */}
+          {quoteResult && !quoteResult.costs && (
+            <div className="card">
+              <p className="text-[var(--error)]">خطا: داده‌ای دریافت نشد</p>
+              <pre className="text-xs mt-2 text-[var(--text-secondary)] overflow-auto">
+                {JSON.stringify(quoteResult, null, 2)}
+              </pre>
+            </div>
           )}
         </div>
       </div>
-    </motion.div>
+    </div>
   )
 }

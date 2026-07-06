@@ -7,12 +7,8 @@ interface QuoteState {
   quote: any | null
   isLoading: boolean
   error: string | null
-  
-  // Materials
   materials: any[]
-  isLoadingMaterials: boolean
   
-  // Actions
   fetchQuote: (
     file: File | null,
     materialId: string,
@@ -22,62 +18,53 @@ interface QuoteState {
   ) => Promise<void>
   
   fetchMaterials: () => Promise<void>
-  
   reset: () => void
 }
 
-export const useQuoteStore = create<QuoteState>((set, get) => ({
+export const useQuoteStore = create<QuoteState>((set) => ({
   quote: null,
   isLoading: false,
   error: null,
-  
   materials: [],
-  isLoadingMaterials: false,
   
   fetchQuote: async (file, materialId, layerHeight, infill, manual) => {
-    set({ isLoading: true, error: null, quote: null })
+    set({ isLoading: true, error: null })
     
     try {
-      let result
+      let response
       
       if (file) {
-        // File upload mode
         const formData = new FormData()
         formData.append('file', file)
         formData.append('material_id', materialId)
         formData.append('layer_height', layerHeight.toString())
         formData.append('infill', infill.toString())
         
-        const response = await axios.post(`${API_URL}/quote/estimate`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        })
-        result = response.data
+        response = await axios.post(`${API_URL}/quote/estimate`, formData)
       } else if (manual) {
-        // Manual input mode
-        const response = await axios.post(`${API_URL}/quote/manual`, {
+        response = await axios.post(`${API_URL}/quote/manual`, {
           grams: manual.grams,
           minutes: manual.minutes,
           material_id: materialId
         })
-        result = response.data
+      } else {
+        throw new Error('No file or manual input provided')
       }
       
-      set({ quote: result, isLoading: false })
+      set({ quote: response.data, isLoading: false })
     } catch (error: any) {
-      set({ 
-        error: error.response?.data?.detail || 'Error calculating quote',
-        isLoading: false 
-      })
+      const errorMsg = error.response?.data?.detail || error.message || 'Error calculating quote'
+      set({ error: errorMsg, isLoading: false })
+      throw error
     }
   },
   
   fetchMaterials: async () => {
-    set({ isLoadingMaterials: true })
     try {
       const response = await axios.get(`${API_URL}/materials`)
-      set({ materials: response.data, isLoadingMaterials: false })
+      set({ materials: response.data })
     } catch (error) {
-      set({ isLoadingMaterials: false })
+      console.error('Failed to fetch materials:', error)
     }
   },
   
