@@ -37,9 +37,7 @@ function App() {
       {/* Protected admin routes */}
       <Route path="/admin" element={
         <ProtectedRoute>
-          <Layout admin>
-            <AdminPage />
-          </Layout>
+          <AdminPage />
         </ProtectedRoute>
       } />
       
