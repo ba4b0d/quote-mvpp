@@ -63,6 +63,7 @@ async def estimate_from_file(
     try:
         # Read file bytes (await the async read)
         file_bytes = await file.read()
+        print(f"[ESTIMATE] File: {file.filename}, size: {len(file_bytes)} bytes")
         result = estimation_service.estimate_from_file(
             file_obj=file_bytes,
             material_id=material_id,
@@ -75,6 +76,9 @@ async def estimate_from_file(
         )
         return result
     except Exception as e:
+        import traceback
+        traceback.print_exc()
+        print(f"[ESTIMATE ERROR] {e}")
         raise HTTPException(
             status_code=500,
             detail=f"Error processing file: {str(e)}"
