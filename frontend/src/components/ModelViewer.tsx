@@ -18,7 +18,7 @@ interface ModelMetrics {
 function ModelScene({ onMetricsChange }: { onMetricsChange?: (metrics: ModelMetrics) => void }) {
   const geometry = useMemo(() => new THREE.BoxGeometry(2, 2, 2), [])
   const material = useMemo(() => new THREE.MeshStandardMaterial({
-    color: 0x00d4aa,
+    color: 0x6C63FF,
     metalness: 0.3,
     roughness: 0.4,
   }), [])
