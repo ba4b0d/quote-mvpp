@@ -23,8 +23,4 @@ services:
     volumes:
       - ./frontend:/app/frontend
     environment:
-      - VITE_API_URL=http://localhost:8000
-    # Uncomment to use frontend-dev Dockerfile below
-
-# Alternative: Use this for just the backend API
-# docker compose up backend
+      - VITE_API_URL=http://backend:8000
