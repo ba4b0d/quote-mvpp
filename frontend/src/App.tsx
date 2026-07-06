@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import { useAuthStore } from './hooks/useAuth'
 import Layout from './components/Layout'
 import HomePage from './pages/HomePage'
@@ -7,8 +8,12 @@ import AdminPage from './pages/AdminPage'
 import LoginPage from './pages/LoginPage'
 import LoadingScreen from './components/LoadingScreen'
 
-function ProtectedRoute({ children }) {
-  const { isAuthenticated, isLoading } = useAuthStore()
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isLoading, checkAuth } = useAuthStore()
+  
+  useEffect(() => {
+    checkAuth()
+  }, [checkAuth])
   
   if (isLoading) return <LoadingScreen />
   
