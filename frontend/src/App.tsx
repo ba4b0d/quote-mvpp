@@ -1,23 +1,16 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { useEffect } from 'react'
 import { useAuthStore } from './hooks/useAuth'
 import Layout from './components/Layout'
 import HomePage from './pages/HomePage'
 import QuotePage from './pages/QuotePage'
 import AdminPage from './pages/AdminPage'
 import LoginPage from './pages/LoginPage'
-import LoadingScreen from './components/LoadingScreen'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading, checkAuth } = useAuthStore()
+  const { isAuthenticated, token } = useAuthStore()
   
-  useEffect(() => {
-    checkAuth()
-  }, [checkAuth])
-  
-  if (isLoading) return <LoadingScreen />
-  
-  if (!isAuthenticated) {
+  // Simple check: if we have a token and are authenticated, render
+  if (!isAuthenticated || !token) {
     return <Navigate to="/login" replace />
   }
   
@@ -27,21 +20,18 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function App() {
   return (
     <Routes>
-      {/* Public routes */}
       <Route path="/" element={<Layout />}>
         <Route index element={<HomePage />} />
         <Route path="quote" element={<QuotePage />} />
         <Route path="login" element={<LoginPage />} />
       </Route>
       
-      {/* Protected admin routes */}
       <Route path="/admin" element={
         <ProtectedRoute>
           <AdminPage />
         </ProtectedRoute>
       } />
       
-      {/* Catch all */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

@@ -6,19 +6,18 @@ const API_URL = '/api/v1'
 interface AuthState {
   token: string | null
   isAuthenticated: boolean
-  isLoading: boolean
   user: { username: string; role: string } | null
   
   login: (username: string, password: string) => Promise<boolean>
   logout: () => void
-  checkAuth: () => Promise<void>
 }
 
-export const useAuthStore = create<AuthState>((set, get) => ({
+export const useAuthStore = create<AuthState>((set) => ({
   token: localStorage.getItem('staff_token'),
-  isAuthenticated: false,
-  isLoading: true,
-  user: null,
+  isAuthenticated: !!localStorage.getItem('staff_token'),
+  user: localStorage.getItem('staff_username') 
+    ? { username: localStorage.getItem('staff_username')!, role: localStorage.getItem('staff_role') || 'staff' }
+    : null,
   
   login: async (username, password) => {
     try {
@@ -31,17 +30,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       
       localStorage.setItem('staff_token', access_token)
       localStorage.setItem('staff_role', role)
+      localStorage.setItem('staff_username', username)
       
       set({
         token: access_token,
         isAuthenticated: true,
-        isLoading: false,
         user: { username, role }
       })
       
       return true
     } catch (error) {
-      set({ isLoading: false })
       return false
     }
   },
@@ -49,50 +47,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   logout: () => {
     localStorage.removeItem('staff_token')
     localStorage.removeItem('staff_role')
+    localStorage.removeItem('staff_username')
     set({
       token: null,
       isAuthenticated: false,
-      user: null,
-      isLoading: false
+      user: null
     })
-  },
-  
-  checkAuth: async () => {
-    // Skip if already authenticated and we have a token
-    const { isAuthenticated, token } = get()
-    if (isAuthenticated && token) return
-    
-    const storedToken = localStorage.getItem('staff_token')
-    
-    if (!storedToken) {
-      set({ isAuthenticated: false, isLoading: false, user: null })
-      return
-    }
-    
-    try {
-      const response = await axios.post(`${API_URL}/auth/verify`, null, {
-        headers: { Authorization: `Bearer ${storedToken}` }
-      })
-      
-      if (response.data.valid) {
-        set({
-          isAuthenticated: true,
-          isLoading: false,
-          user: {
-            username: response.data.username,
-            role: response.data.role
-          },
-          token: storedToken
-        })
-      } else {
-        localStorage.removeItem('staff_token')
-        localStorage.removeItem('staff_role')
-        set({ isAuthenticated: false, isLoading: false, user: null })
-      }
-    } catch (error) {
-      localStorage.removeItem('staff_token')
-      localStorage.removeItem('staff_role')
-      set({ isAuthenticated: false, isLoading: false, user: null })
-    }
   }
 }))
